@@ -1,0 +1,35 @@
+# Routage de l’application de gestion des utilisateurs.
+#
+# La racine web est ce répertoire. Les adresses annoncées par le cahier des
+# charges ne portent pas d’extension : elles sont réécrites vers les fichiers
+# PHP correspondants. Le refus ci-dessous ferme la porte directe, donc la seule
+# entrée possible est l’adresse réécrite.
+
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Refus de toute adresse interrogeant un fichier PHP par son nom.
+    #
+    # La condition porte sur THE_REQUEST, qui est la requête d’origine telle
+    # que le client l’a écrite, et que la réécriture interne ne modifie pas.
+    # Sans cette précaution, la règle s’appliquerait aussi au fichier choisi par
+    # DirectoryIndex, et la racine du site cesserait de répondre.
+    RewriteCond %{THE_REQUEST} \s/+[^?\s]*\.php(?:[\s?]) [NC]
+    RewriteRule ^ - [F,L]
+
+    # Adresse sans extension vers le fichier PHP de même nom.
+    #
+    # La règle ne vise qu’un nom simple, sans séparateur de répertoire : les
+    # ressources /css/style.css et /js/app.js existent sur le disque, la
+    # première condition les écarte, et la seconde refuse toute tentative de
+    # transformer un sous-répertoire en fichier PHP.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^([A-Za-z0-9_-]+)$ $1.php [L]
+</IfModule>
+
+# Aucune liste de contenu de répertoire, même si l’option venait d’être
+# rétablie un jour dans la configuration de l’hôte.
+Options -Indexes
