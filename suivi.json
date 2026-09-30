@@ -2,20 +2,20 @@
   "schema_version": 1,
   "projet": {
     "nom": "agentic-mdi",
-    "finalite": "Système agentique opencode : un orchestrateur transforme un cahier des charges en contexte de travail, découpe en tâches, délègue à trois sous-agents, et tient un suivi horodaté.",
+    "finalite": "Construire, par le système agentique de ce dépôt, une application de gestion utilisateur conteneurisée : inscription, connexion, déconnexion et tableau de bord protégé, en PHP et MySQL, sans framework ni ressource distante.",
     "cahier_des_charges": {
       "dossier": "CDC/",
-      "fichiers": [],
-      "horodatage_source": null,
-      "etat": "Seul un gabarit est déposé, pas de cahier des charges réel."
+      "fichiers": ["cdc.md"],
+      "horodatage_source": "2026-09-30T09:09:47Z",
+      "etat": "Cahier des charges réel déposé le 2026-09-30, plus récent que le gabarit du contexte : application de gestion utilisateur, PHP 8.2, MySQL 8, Apache, Docker, sans framework ni CDN."
     },
     "contexte_travail": {
       "fichier": "CONTEXT.md",
-      "horodatage": "2026-09-29T22:29:38Z",
-      "etat": "gabarit initial"
+      "horodatage": "2026-09-30T09:22:11Z",
+      "etat": "Contexte réel produit à partir de CDC/cdc.md, dix sections remplies, sept zones d’ombre consignées en section 9."
     }
   },
-  "statut_global": "cadrage",
+  "statut_global": "execution",
   "statuts_possibles": [
     "cadrage",
     "en_cours",
@@ -604,7 +604,7 @@
       "description": "Remplacer le gabarit CONTEXT.md par le contexte réel dès que le cahier des charges est déposé dans CDC/.",
       "agent": "orchestrateur",
       "priorite": "P0",
-      "statut": "a_faire",
+      "statut": "en_cours",
       "criteres_acceptation": [
         "Les dix sections du gabarit sont remplies à partir des fichiers de CDC/",
         "Chaque fichier de CDC/ a été lu en entier",
@@ -643,7 +643,7 @@
         "resultat": null
       },
       "creee_le": "2026-09-29T22:29:38Z",
-      "modifiee_le": "2026-09-29T22:29:38Z",
+      "modifiee_le": "2026-09-30T09:22:11Z",
       "validee_le": null,
       "historique": [
         {
@@ -657,6 +657,18 @@
           "agent": "orchestrateur",
           "evenement": "changement_statut",
           "detail": "Statut : a_faire"
+        },
+        {
+          "horodatage": "2026-09-30T09:22:11Z",
+          "agent": "orchestrateur",
+          "evenement": "changement_statut",
+          "detail": "Statut : en_cours"
+        },
+        {
+          "horodatage": "2026-09-30T09:22:11Z",
+          "agent": "orchestrateur",
+          "evenement": "cadrage",
+          "detail": "CDC/cdc.md lu en entier, CONTEXT.md réécrit en dix sections, sept zones d’ombre consignées, onze tâches applicatives découpées de T-012 à T-022. En attente des deux portes de revue."
         }
       ]
     },
@@ -814,6 +826,265 @@
           "detail": "Statut : validee"
         }
       ]
+    },
+    {
+      "id": "T-012",
+      "titre": "Rendre le versionnement atteignable par l’orchestrateur",
+      "description": "La liste blanche bash de l’agent orchestrateur, dans opencode.json, autorise l’inspection mais interdit git add, git commit et git push. La règle permanente impose pourtant de versionner. Le système ne peut donc pas clôturer sa propre boucle, et le blocage B-002 reste ouvert.",
+      "agent": "devops", "priorite": "P0", "statut": "a_faire",
+      "criteres_acceptation": [
+        "La section bash de l’agent orchestrateur autorise git add, git commit, git push et git pull, sans retirer aucune autorisation déjà présente",
+        "Aucune autorisation générique n’est introduite : la liste reste nominative, avec le refus par défaut conservé en tête",
+        "Les interdits absolus restent refusés pour l’orchestrateur : git push --force*, git push -f*, git reset --hard*, git rebase*, git clean -fd*, git checkout ., git commit --amend*",
+        "jq -e . opencode.json renvoie un code de sortie nul, et opencode debug config accepte le fichier",
+        "Le rapport indique qu’un rechargement de session est nécessaire pour que la liste blanche prenne effet, sans prétendre l’avoir vérifié en cours de session"
+      ],
+      "fichiers_permis": ["opencode.json"],
+      "dependances": [],
+      "revues": {"porte_1_conformite": {"statut": null, "verdict": null, "horodatage": null}, "porte_2_qualite": {"statut": null, "verdict": null, "constats": []}, "phase_de_test": {"statut": null, "unitaire": null, "fonctionnel": null, "non_fonctionnel": null, "integration": null, "non_regression": null}},
+      "verification": {"commandes": [], "resultat": null},
+      "creee_le": "2026-09-30T09:22:11Z", "modifiee_le": "2026-09-30T09:22:11Z", "validee_le": null,
+      "historique": [
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "creation", "detail": "Rendre le versionnement atteignable par l’orchestrateur"},
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "changement_statut", "detail": "Statut : a_faire"}
+      ]
+    },
+    {
+      "id": "T-013",
+      "titre": "Socle conteneur : composition, image PHP, hôte Apache, variables",
+      "description": "Premier jalon applicatif. Fichier de composition Docker, image PHP 8.2 avec Apache, configuration d’hôte qui place public à la racine du site, et variables d’environnement de laboratoire sous forme de gabarits.",
+      "agent": "devops", "priorite": "P0", "statut": "a_faire",
+      "criteres_acceptation": [
+        "docker compose config renvoie un code de sortie nul",
+        "Deux services sont déclarés : app, construit depuis app/Dockerfile sur l’image php:8.2-apache, et db, sur l’image mysql:8.0",
+        "Les ports 8080 vers 80 pour l’application et 3307 vers 3306 pour la base sont publiés",
+        "app/docker/apache-vhost.conf fixe DocumentRoot sur /var/www/html/public, accorde AllowOverride All et inclut mod_rewrite ; une requête vers /src/config/database.php renvoie un code 404",
+        "Aucun mot de passe en clair : .env.example ne contient que des gabarits entre chevrons, et le contrôle anti-fuite renvoie un code de sortie nul",
+        "Le service app attend que la base accepte les connexions avant de répondre, par un contrôle de santé déclaré dans le service db",
+        "Les variables DB_HOST, DB_NAME, DB_USER et DB_PASS sont transmises par l’environnement, et jamais codées en dur dans un fichier PHP"
+      ],
+      "fichiers_permis": ["docker-compose.yml", "app/Dockerfile", "app/docker/apache-vhost.conf", ".env.example", ".dockerignore"],
+      "dependances": ["T-012"],
+      "revues": {"porte_1_conformite": {"statut": null, "verdict": null, "horodatage": null}, "porte_2_qualite": {"statut": null, "verdict": null, "constats": []}, "phase_de_test": {"statut": null, "unitaire": null, "fonctionnel": null, "non_fonctionnel": null, "integration": null, "non_regression": null}},
+      "verification": {"commandes": [], "resultat": null},
+      "creee_le": "2026-09-30T09:22:11Z", "modifiee_le": "2026-09-30T09:22:11Z", "validee_le": null,
+      "historique": [
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "creation", "detail": "Socle conteneur : composition, image PHP, hôte Apache, variables"},
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "changement_statut", "detail": "Statut : a_faire"}
+      ]
+    },
+    {
+      "id": "T-014",
+      "titre": "Schéma de base et amorçage du volume",
+      "description": "Script d’initialisation du schéma imposé par le cahier des charges, monté dans le répertoire d’initialisation du conteneur MySQL. Aucune donnée de démonstration en dur.",
+      "agent": "devops", "priorite": "P0", "statut": "a_faire",
+      "criteres_acceptation": [
+        "Le script crée la base gestion_users si elle n’existe pas déjà",
+        "La table users comporte exactement les huit colonnes du cahier des charges, dans l’ordre : id en entier non signé, clé primaire et auto-incrémentée ; nom et prenom en VARCHAR(50) non nul ; email en VARCHAR(255) non nul et unique ; password en VARCHAR(255) non nul ; created_at et updated_at en horodatage ; last_login en horodatage accepté nul",
+        "Une mise à jour de ligne fait passer updated_at à l’instant courant, et last_login accepte la valeur nulle",
+        "Le script est monté dans le répertoire d’initialisation du service db, et s’exécute donc au premier démarrage du volume",
+        "Après démarrage de la pile et attente de la disponibilité de la base, l’introspection des colonnes renvoie les huit colonnes attendues, avec le bon type et la bonne contrainte d’unicité",
+        "La table démarre vide : aucun compte de démonstration n’est inséré par le script",
+        "Le script s’exécute deux fois de suite sans renvoyer d’erreur"
+      ],
+      "fichiers_permis": ["app/sql/init.sql"],
+      "dependances": ["T-013"],
+      "revues": {"porte_1_conformite": {"statut": null, "verdict": null, "horodatage": null}, "porte_2_qualite": {"statut": null, "verdict": null, "constats": []}, "phase_de_test": {"statut": null, "unitaire": null, "fonctionnel": null, "non_fonctionnel": null, "integration": null, "non_regression": null}},
+      "verification": {"commandes": [], "resultat": null},
+      "creee_le": "2026-09-30T09:22:11Z", "modifiee_le": "2026-09-30T09:22:11Z", "validee_le": null,
+      "historique": [
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "creation", "detail": "Schéma de base et amorçage du volume"},
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "changement_statut", "detail": "Statut : a_faire"}
+      ]
+    },
+    {
+      "id": "T-015",
+      "titre": "Connexion à la base et session sécurisée",
+      "description": "Noyau technique partagé : une connexion unique en PDO, une session durcie, et un point d’amorçage unique chargé par chaque page, qui tient la logique hors de la racine du site.",
+      "agent": "developpeur", "priorite": "P0", "statut": "a_faire",
+      "criteres_acceptation": [
+        "Le contrôle syntaxique réussit sur les trois fichiers",
+        "Une fonction unique ouvre la connexion en mode exception, avec le jeu de caractères utf8mb4 et les requêtes préparées natives, sans émulation",
+        "Les identifiants proviennent uniquement des variables d’environnement ; aucun mot de passe n’apparaît dans le code",
+        "Une exception de connexion est journalisée avec son contexte, et le navigateur reçoit une page d’erreur générique : aucun message de serveur, aucun identifiant, aucune trace de pile",
+        "La session est ouverte avec HttpOnly et SameSite=Strict, et avec Secure dès lors que la requête est en HTTPS",
+        "Une fonction de jeton émet un jeton en session et le restitue ; une soumission dont le jeton est absent ou différent est refusée par un code 403",
+        "La destruction de session supprime le cookie côté client, et la vérification d’un jeton utilise une comparaison constante dans le temps"
+      ],
+      "fichiers_permis": ["app/src/config/database.php", "app/src/helpers/session.php", "app/src/bootstrap.php"],
+      "dependances": ["T-014"],
+      "revues": {"porte_1_conformite": {"statut": null, "verdict": null, "horodatage": null}, "porte_2_qualite": {"statut": null, "verdict": null, "constats": []}, "phase_de_test": {"statut": null, "unitaire": null, "fonctionnel": null, "non_fonctionnel": null, "integration": null, "non_regression": null}},
+      "verification": {"commandes": [], "resultat": null},
+      "creee_le": "2026-09-30T09:22:11Z", "modifiee_le": "2026-09-30T09:22:11Z", "validee_le": null,
+      "historique": [
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "creation", "detail": "Connexion à la base et session sécurisée"},
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "changement_statut", "detail": "Statut : a_faire"}
+      ]
+    },
+    {
+      "id": "T-016",
+      "titre": "Validateur de formulaire côté serveur",
+      "description": "Règles de validation imposées par le cahier des charges, appliquées en PHP. Chaque règle doit être prouvable par un contrôle qui échoue lorsqu’elle est enfreinte.",
+      "agent": "developpeur", "priorite": "P0", "statut": "a_faire",
+      "criteres_acceptation": [
+        "Le contrôle syntaxique réussit sur le fichier",
+        "Nom et prénom : de 2 à 50 caractères, lettres, espaces, tirets et apostrophes seulement ; une chaîne contenant du balisage est refusée, de même qu’un nom d’un seul caractère",
+        "Adresse électronique : validée par filter_var avec le filtre de courrier, et une adresse mal formée est refusée",
+        "Mot de passe : au moins 8 caractères, au moins une majuscule, une minuscule et un chiffre ; chacune des quatre conditions est vérifiée séparément",
+        "Confirmation comparée à l’égalité stricte au mot de passe saisi",
+        "Les erreurs sont renvoyées par champ nommé, avec un message en français destiné au lecteur, et jamais sous forme d’exception",
+        "Chaque règle dispose d’un contrôle qui échoue quand elle est enfreinte ; le rapport indique la commande et le résultat réel de chacun"
+      ],
+      "fichiers_permis": ["app/src/helpers/validator.php"],
+      "dependances": ["T-015"],
+      "revues": {"porte_1_conformite": {"statut": null, "verdict": null, "horodatage": null}, "porte_2_qualite": {"statut": null, "verdict": null, "constats": []}, "phase_de_test": {"statut": null, "unitaire": null, "fonctionnel": null, "non_fonctionnel": null, "integration": null, "non_regression": null}},
+      "verification": {"commandes": [], "resultat": null},
+      "creee_le": "2026-09-30T09:22:11Z", "modifiee_le": "2026-09-30T09:22:11Z", "validee_le": null,
+      "historique": [
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "creation", "detail": "Validateur de formulaire côté serveur"},
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "changement_statut", "detail": "Statut : a_faire"}
+      ]
+    },
+    {
+      "id": "T-017",
+      "titre": "Modèle Utilisateur",
+      "description": "Accès à la table users : unicité de l’adresse, création avec empreinte bcrypt, recherche par adresse, mise à jour de la dernière connexion.",
+      "agent": "developpeur", "priorite": "P0", "statut": "a_faire",
+      "criteres_acceptation": [
+        "Le contrôle syntaxique réussit sur le fichier",
+        "Une fonction indique si une adresse existe déjà, par requête préparée : vrai pour une adresse présente, faux pour une adresse absente",
+        "La création refuse une adresse déjà enregistrée et n’insère alors aucune ligne",
+        "Le mot de passe est enregistré par password_hash avec l’algorithme bcrypt ; la valeur en clair n’est jamais consignée dans un journal ni renvoyée",
+        "La recherche par adresse renvoie la ligne complète ou une valeur nulle, jamais une exception pour une adresse absente",
+        "Le marquage de connexion met à jour la dernière connexion à l’instant courant, vérifiable en base",
+        "Aucune requête ne concatène une valeur : toutes utilisent des paramètres liés, vérifié par relecture du fichier"
+      ],
+      "fichiers_permis": ["app/src/models/User.php"],
+      "dependances": ["T-015"],
+      "revues": {"porte_1_conformite": {"statut": null, "verdict": null, "horodatage": null}, "porte_2_qualite": {"statut": null, "verdict": null, "constats": []}, "phase_de_test": {"statut": null, "unitaire": null, "fonctionnel": null, "non_fonctionnel": null, "integration": null, "non_regression": null}},
+      "verification": {"commandes": [], "resultat": null},
+      "creee_le": "2026-09-30T09:22:11Z", "modifiee_le": "2026-09-30T09:22:11Z", "validee_le": null,
+      "historique": [
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "creation", "detail": "Modèle Utilisateur"},
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "changement_statut", "detail": "Statut : a_faire"}
+      ]
+    },
+    {
+      "id": "T-018",
+      "titre": "Contrôleur d’authentification",
+      "description": "Inscription, connexion et déconnexion, avec contrôle du jeton à chaque soumission et message d’erreur unique à la connexion.",
+      "agent": "developpeur", "priorite": "P0", "statut": "a_faire",
+      "criteres_acceptation": [
+        "Le contrôle syntaxique réussit sur le fichier",
+        "L’inscription valide l’ensemble des champs, vérifie l’unicité, crée l’utilisateur, ouvre une session régénérée et redirige vers le tableau de bord",
+        "L’inscription avec une adresse déjà enregistrée rend le formulaire avec un message d’erreur et n’insère aucune ligne",
+        "La connexion réussie ouvre une session régénérée, met à jour la dernière connexion et redirige vers le tableau de bord",
+        "La connexion avec des identifiants faux rend un message unique, rigoureusement identique pour une adresse inconnue et pour un mot de passe faux",
+        "La déconnexion détruit la session, supprime le cookie et redirige vers la page de connexion",
+        "Toute action déclenchée par une soumission vérifie le jeton avant tout traitement, et une soumission sans jeton reçoit un code 403 sans effet de bord"
+      ],
+      "fichiers_permis": ["app/src/controllers/AuthController.php"],
+      "dependances": ["T-016", "T-017"],
+      "revues": {"porte_1_conformite": {"statut": null, "verdict": null, "horodatage": null}, "porte_2_qualite": {"statut": null, "verdict": null, "constats": []}, "phase_de_test": {"statut": null, "unitaire": null, "fonctionnel": null, "non_fonctionnel": null, "integration": null, "non_regression": null}},
+      "verification": {"commandes": [], "resultat": null},
+      "creee_le": "2026-09-30T09:22:11Z", "modifiee_le": "2026-09-30T09:22:11Z", "validee_le": null,
+      "historique": [
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "creation", "detail": "Contrôleur d’authentification"},
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "changement_statut", "detail": "Statut : a_faire"}
+      ]
+    },
+    {
+      "id": "T-019",
+      "titre": "Contrôleur utilisateur et protection du tableau de bord",
+      "description": "Lecture de la session courante, affichage des informations de l’utilisateur connecté, et refus d’accès à toute requête sans session valide.",
+      "agent": "developpeur", "priorite": "P0", "statut": "a_faire",
+      "criteres_acceptation": [
+        "Le contrôle syntaxique réussit sur le fichier",
+        "L’affichage du tableau de bord redirige vers la page de connexion par un code 302 lorsqu’aucune session valide n’existe",
+        "La page affiche le nom, le prénom et l’adresse électronique de l’utilisateur issu de la session, et rien d’autre",
+        "Le bouton de déconnexion est rendu par la page et soumet un formulaire vers la déconnexion",
+        "Toute donnée utilisateur affichée passe par une fonction d’échappement HTML, vérifié par relecture du fichier",
+        "L’accès refusé ne laisse aucune trace de session et n’affiche aucun nom de champ"
+      ],
+      "fichiers_permis": ["app/src/controllers/UserController.php"],
+      "dependances": ["T-018"],
+      "revues": {"porte_1_conformite": {"statut": null, "verdict": null, "horodatage": null}, "porte_2_qualite": {"statut": null, "verdict": null, "constats": []}, "phase_de_test": {"statut": null, "unitaire": null, "fonctionnel": null, "non_fonctionnel": null, "integration": null, "non_regression": null}},
+      "verification": {"commandes": [], "resultat": null},
+      "creee_le": "2026-09-30T09:22:11Z", "modifiee_le": "2026-09-30T09:22:11Z", "validee_le": null,
+      "historique": [
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "creation", "detail": "Contrôleur utilisateur et protection du tableau de bord"},
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "changement_statut", "detail": "Statut : a_faire"}
+      ]
+    },
+    {
+      "id": "T-020",
+      "titre": "Pages publiques et routage",
+      "description": "Les cinq pages du cahier des charges et la règle de réécriture qui fait répondre aux adresses /register, /login, /dashboard et /logout, sans extension.",
+      "agent": "developpeur", "priorite": "P0", "statut": "a_faire",
+      "criteres_acceptation": [
+        "Le contrôle syntaxique réussit sur les cinq pages",
+        "Les quatre adresses du cahier des charges répondent sans erreur, et l’adresse racine redirige vers la connexion ou le tableau de bord selon la présence d’une session",
+        "L’appel du tableau de bord sans session renvoie un code 302 avec un en-tête de redirection vers la connexion, vérifié sur la ligne d’état et l’en-tête",
+        "Le balisage de chaque page ne référence aucune ressource distante : aucune adresse absolue en http ou https, ni ressource protocole-relative",
+        "Une erreur inattendue renvoie une page générique et journalise le détail : aucune trace de pile, aucun message d’exception et aucun chemin de fichier dans la réponse",
+        "Les valeurs rejetées à la validation sont rendues dans les champs du formulaire, échappées",
+        "La racine du site est le répertoire public : le fichier de configuration de la base, situé dans src, n’est pas atteignable par le protocole HTTP"
+      ],
+      "fichiers_permis": ["app/public/index.php", "app/public/register.php", "app/public/login.php", "app/public/logout.php", "app/public/dashboard.php", "app/public/.htaccess"],
+      "dependances": ["T-019"],
+      "revues": {"porte_1_conformite": {"statut": null, "verdict": null, "horodatage": null}, "porte_2_qualite": {"statut": null, "verdict": null, "constats": []}, "phase_de_test": {"statut": null, "unitaire": null, "fonctionnel": null, "non_fonctionnel": null, "integration": null, "non_regression": null}},
+      "verification": {"commandes": [], "resultat": null},
+      "creee_le": "2026-09-30T09:22:11Z", "modifiee_le": "2026-09-30T09:22:11Z", "validee_le": null,
+      "historique": [
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "creation", "detail": "Pages publiques et routage"},
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "changement_statut", "detail": "Statut : a_faire"}
+      ]
+    },
+    {
+      "id": "T-021",
+      "titre": "Interface : feuille de style et scripts du navigateur",
+      "description": "Mise en page responsive sans dépendance externe, validation en temps réel et indicateur de force du mot de passe, conformément aux exigences d’interface du cahier des charges.",
+      "agent": "developpeur", "priorite": "P1", "statut": "a_faire",
+      "criteres_acceptation": [
+        "Aucune ressource externe dans les trois fichiers : aucune adresse réseau, aucune police ni bibliothèque distante, aucune requête déclenchée au chargement d’une page",
+        "La feuille de style déclare des variables CSS et applique d’abord la mise en page mobile, puis un ajustement par requête de média pour les écrans larges",
+        "La validation côté navigateur porte sur le nom, le prénom, l’adresse électronique, le mot de passe et sa confirmation, et affiche un message sous chaque champ",
+        "Un indicateur de force du mot de passe est affiché et tient compte de la longueur, des majuscules, des minuscules et des chiffres",
+        "Le JavaScript n’empêche jamais la soumission du formulaire : il n’est qu’un confort d’affichage, et le serveur revalide l’ensemble des champs",
+        "Les messages produits par les scripts sont en français, avec accents"
+      ],
+      "fichiers_permis": ["app/public/css/style.css", "app/public/js/validation.js", "app/public/js/app.js"],
+      "dependances": ["T-020"],
+      "revues": {"porte_1_conformite": {"statut": null, "verdict": null, "horodatage": null}, "porte_2_qualite": {"statut": null, "verdict": null, "constats": []}, "phase_de_test": {"statut": null, "unitaire": null, "fonctionnel": null, "non_fonctionnel": null, "integration": null, "non_regression": null}},
+      "verification": {"commandes": [], "resultat": null},
+      "creee_le": "2026-09-30T09:22:11Z", "modifiee_le": "2026-09-30T09:22:11Z", "validee_le": null,
+      "historique": [
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "creation", "detail": "Interface : feuille de style et scripts du navigateur"},
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "changement_statut", "detail": "Statut : a_faire"}
+      ]
+    },
+    {
+      "id": "T-022",
+      "titre": "Vérification de laboratoire et documentation de démarrage",
+      "description": "Commande de preuve du projet et documentation de démarrage. Cette tâche ferme le cahier des charges : elle rejoue ses dix critères d’acceptation et documente les points d’entrée.",
+      "agent": "devops", "priorite": "P1", "statut": "a_faire",
+      "criteres_acceptation": [
+        "Le script de vérification démarre la pile, joue ses contrôles et renvoie un code de sortie nul sur un dépôt conforme, et non nul sinon",
+        "Le script contrôle l’inscription, la présence d’une empreinte bcrypt, le refus d’un mot de passe trop court, la connexion réussie, le refus d’identifiants faux, la redirection du tableau de bord sans session, la déconnexion avec disparition du cookie, l’échappement d’un prénom contenant du balisage, la persistance des données après redémarrage du conteneur, et l’absence de ressource distante dans les pages",
+        "Le script n’affiche jamais une valeur de mot de passe : il ne publie que la longueur de l’empreinte et le résultat du contrôle",
+        "Le script produit son fichier d’environnement de laboratoire avec des valeurs générées à l’exécution, et ce fichier est absent du suivi de version",
+        "Le fichier README documente la commande de démarrage, les variables d’environnement, les quatre adresses du site, et la commande de vérification",
+        "Le contrôle anti-fuite renvoie un code de sortie nul après la rédaction du script et du README"
+      ],
+      "fichiers_permis": ["scripts/verifier.sh", "README.md"],
+      "dependances": ["T-021"],
+      "revues": {"porte_1_conformite": {"statut": null, "verdict": null, "horodatage": null}, "porte_2_qualite": {"statut": null, "verdict": null, "constats": []}, "phase_de_test": {"statut": null, "unitaire": null, "fonctionnel": null, "non_fonctionnel": null, "integration": null, "non_regression": null}},
+      "verification": {"commandes": [], "resultat": null},
+      "creee_le": "2026-09-30T09:22:11Z", "modifiee_le": "2026-09-30T09:22:11Z", "validee_le": null,
+      "historique": [
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "creation", "detail": "Vérification de laboratoire et documentation de démarrage"},
+        {"horodatage": "2026-09-30T09:22:11Z", "agent": "orchestrateur", "evenement": "changement_statut", "detail": "Statut : a_faire"}
+      ]
     }
   ],
   "decisions": [
@@ -937,6 +1208,76 @@
         "Adopter la syntaxe de la version 2 par anticipation."
       ],
       "consequence": "Une migration ultérieure devra réécrire `opencode.json` et les quatre fichiers d'agent."
+    },
+    {
+      "id": "D-011",
+      "horodatage": "2026-09-30T09:22:11Z",
+      "agent": "orchestrateur",
+      "objet": "Emplacement du code applicatif",
+      "decision": "Le code applicatif vit à la racine du dépôt : `docker-compose.yml`, `app/` et `scripts/`. Aucun sous-dossier `projet/` n’est créé.",
+      "justification": "Le cahier des charges nomme une racine générique `projet/`, mais ce dépôt est déjà le projet, et son outillage doit rester au même niveau que le livrable. L’arborescence `app/` est reprise telle quelle, avec `public/`, `src/`, `sql/`.",
+      "alternatives_ecartees": ["Créer un sous-dossier `projet/` qui aurait mimé l’exemple du cahier des charges", "Placer l’application sous `.opencode/`, qui est réservé aux agents et aux compétences"],
+      "consequence": "Le dépôt mêle l’outillage agentique et l’application. La séparation reste lisible : les fichiers d’agent sont tous sous `.opencode/`."
+    },
+    {
+      "id": "D-012",
+      "horodatage": "2026-09-30T09:22:11Z",
+      "agent": "orchestrateur",
+      "objet": "Commande de preuve du projet",
+      "decision": "La preuve est produite par `scripts/verifier.sh`, un script shell qui pilote les conteneurs et rejoue les dix critères d’acceptation du cahier des charges. PHPUnit et Cypress restent hors périmètre.",
+      "justification": "Le cahier des charges ne donne aucune commande de vérification et renvoie explicitement les tests automatisés aux évolutions futures. Or aucune tâche ne peut être validée sans preuve exécutée : il fallait donc une commande, sans introduire de framework que le cahier des charges exclut.",
+      "alternatives_ecartees": ["Ajouter PHPUnit malgré son exclusion par le cahier des charges", "Valider les tâches sur la seule relecture du code, sans commande"],
+      "consequence": "Le projet gagne une preuve reproductible sans dépendance nouvelle. À confirmer : le cahier des charges n’a pas lui-même demandé cette commande."
+    },
+    {
+      "id": "D-013",
+      "horodatage": "2026-09-30T09:22:11Z",
+      "agent": "orchestrateur",
+      "objet": "Racine du site et adresses",
+      "decision": "`DocumentRoot` pointe sur `/var/www/html/public`, et un fichier `.htaccess` dans ce répertoire fait répondre `/register`, `/login`, `/dashboard` et `/logout` vers les fichiers `.php` correspondants.",
+      "justification": "Le cahier des charges annonce des adresses sans extension et active `mod_rewrite`, mais son Dockerfile laisse `DocumentRoot` sur la racine de l’application. Tel quel, les pages seraient servies sous `/public/` et le fichier `src/config/database.php` serait téléchargeable depuis le navigateur, avec les identifiants qu’il lit. Le cahier des charges est donc incomplet sur ce point, et la correction est le minimum qui honore à la fois ses adresses et sa table de sécurité.",
+      "alternatives_ecartees": ["Laisser `DocumentRoot` sur la racine de l’application, enViolation de sa propre table de sécurité", "Monter `./app/public` sur `/var/www/html`, ce qui masquerait `src/` au conteneur et casserait l’autolochergeur", "Exposer `/register.php`, ce qui contredit les adresses annoncées"],
+      "consequence": "Les adresses du cahier des charges tiennent, et la logique applicative sort de la racine du site. Deux fichiers s’ajoutent à son arborescence : `app/docker/apache-vhost.conf` et `app/public/.htaccess`."
+    },
+    {
+      "id": "D-014",
+      "horodatage": "2026-09-30T09:22:11Z",
+      "agent": "orchestrateur",
+      "objet": "Mots de passe de démonstration",
+      "decision": "Les valeurs littérales du cahier des charges pour la base sont abandonnées. `.env.example` ne contient que des gabarits entre chevrons, et les valeurs de laboratoire sont générées à l’exécution dans un fichier `.env` absent du suivi de version.",
+      "justification": "Le contrôle anti-fuite refuse toute ligne terminé par `PASSWORD=` suivie d’au moins douze caractères alphanumériques. Les deux valeurs du cahier des charges tombent sous ce motif : les reprendre bloquerait le premier commit. Un dépôt privé protège un dépôt, pas une ligne Copiée depuis une source.",
+      "alternatives_ecartees": ["Reprendre les valeurs du cahier des charges, refusées par le contrôle avant commit", "Écrire les valeurs dans la documentation, où elles finiraient dans l’historique"],
+      "consequence": "Un démarrage sur un dépôt neuf exige de fabriquer son fichier `.env`. `scripts/verifier.sh` le fera seul, et le README l’expliquera."
+    },
+    {
+      "id": "D-015",
+      "horodatage": "2026-09-30T09:22:11Z",
+      "agent": "orchestrateur",
+      "objet": "Pilote d’accès à la base",
+      "decision": "PDO exclusivement. Le pilote `mysqli` n’est pas installé, alors que le Dockerfile d’exemple du cahier des charges l’installe.",
+      "justification": "La table de sécurité impose « PDO + requêtes préparées », et aucune exigence ne cite `mysqli`. Installer deux pilotes coûte une extension à compiler et à maintenir, pour un code qui ne s’en sert pas.",
+      "alternatives_ecartees": ["Conserver les deux pilotes pour suivre le Dockerfile à la lettre", "Utiliser `mysqli` seulement parce qu’il est installé"],
+      "consequence": "Une extension de moins à compiler dans l’image, et une seule façon d’écrire les requêtes."
+    },
+    {
+      "id": "D-016",
+      "horodatage": "2026-09-30T09:22:11Z",
+      "agent": "orchestrateur",
+      "objet": "Version de PHP",
+      "decision": "PHP 8.2, sans conditions.",
+      "justification": "Le cahier des charges se contredit : le tableau des technologies demande PHP 8.2 ou plus, et son Dockerfile demande 8.2, mais la section des contraintes techniques demande au moins 8.0. La règle de rédaction tranche : la version la plus précise l’emporte.",
+      "alternatives_ecartees": ["PHP 8.0, qui refuse certaines fonctions employées ici", "Une version plus récente que 8.2, que le cahier des charges n’envisage pas"],
+      "consequence": "Aucune ambiguïté d’environnement. La contradiction interne du cahier des charges reste à corriger par son auteur."
+    },
+    {
+      "id": "D-017",
+      "horodatage": "2026-09-30T09:22:11Z",
+      "agent": "orchestrateur",
+      "objet": "Point d’amorçage du code",
+      "decision": "Un fichier `app/src/bootstrap.php` est ajouté à l’arborescence du cahier des charges. Il charge la configuration, ouvre la session et déclare un autolochergeur, et chaque page le charge par une seule ligne.",
+      "justification": "Sans framework, cinq pages auraient chacune répété la même liste de `require`. Le fichier est placé dans `src/`, donc hors de la racine du site, conformément à la décision D-013.",
+      "alternatives_ecartees": ["Répéter la liste des `require` dans les cinq pages", "Placer l’amorceur dans `public/`, ce qui l’exposerait au téléchargement"],
+      "consequence": "Un fichier s’ajoute à l’arborescence du cahier des charges, et le chargement du code tient en un point unique."
     }
   ],
   "blocages": [
@@ -948,7 +1289,37 @@
       "description": "Le dossier CDC/ ne contient qu'un gabarit, pas de cahier des charges réel.",
       "impact": "CONTEXT.md reste un gabarit, et aucune tâche d'un projet réel ne peut être découpée.",
       "action_attendue": "Déposer le cahier des charges dans CDC/, puis demander à l'orchestrateur de démarrer le projet.",
-      "statut": "ouvert"
+      "statut": "leve",
+      "leve_le": "2026-09-30T09:22:11Z",
+      "resolution": "Le cahier des charges réel a été déposé dans CDC/cdc.md le 2026-09-30, plus récent que le gabarit. T-009 est passée en cours, CONTEXT.md a été réécrit en dix sections et onze tâches ont été découpées."
+    },
+    {
+      "id": "B-002",
+      "horodatage": "2026-09-30T08:29:00Z",
+      "agent": "orchestrateur",
+      "tache": null,
+      "description": "Demande de commit et de push, mais la couche de permissions de la session refuse toute commande git : aucune entrée d'autorisation pour `git add`, `git commit` et `git push`, et une règle de refus générique sur `bash`.",
+      "impact": "Les travaux non versionnés de la session ne peuvent pas être enregistrés ni poussés. Même `git status` est refusé, donc l'état du dépôt n'a pas pu être inspecté par commande.",
+      "action_attendue": "Ouvrir une session dont la liste d'autorisations `bash` couvre `git status`, `git diff`, `git add`, `git commit` et `git push`, puis relancer la demande. Le projet autorise déjà `bash` en libre-service dans `opencode.json` : l'écart vient de la session, pas de la configuration du dépôt.",
+      "statut": "ouvert",
+      "correction": "Le diagnostic initial est inexact. Vérification faite le 2026-09-30 : `git status`, `git log`, `git diff`, `ls`, `cat`, `wc`, `jq`, `date -u` et `./check-secrets.sh` passent, tandis que `git add`, `git commit`, `git push`, et toute redirection vers un fichier du dépôt sont refusés. La cause est la configuration du dépôt, pas la session : `opencode.json` porte, dans `agent.orchestrateur.permission.bash`, un refus par défaut puis une liste blanche limitée à l’inspection. La règle permanente qui impose de versionner est donc inapplicable à l’orchestrateur, qui est le seul agent autorisé à écrire `CONTEXT.md` et `suivi.json`.",
+      "tache_associee": "T-012",
+"action_attendue_revissee": "Faire appliquer T-012 par le devops, puis ouvrir une nouvelle session pour que la liste blanche prenne effet. Tant que T-012 n’est pas faite, `CONTEXT.md` et `suivi.json` restent non versionnés."
+    },
+    {
+      "id": "B-003",
+      "horodatage": "2026-09-30T09:22:11Z",
+      "agent": "orchestrateur",
+      "tache": "T-009",
+      "description": "Le cahier des charges laisse trois zones d’ombre qui ne sont pas des détails d’écriture : il ne dit ni où placer le code, ni comment prouver le résultat, ni comment rendre les adresses sans extension qu’il annonce.",
+      "impact": "Sans arbitrage, chaque sous-agent prendrait une décision différente. Les trois points ont donc été tranchés et consignés en D-011, D-012 et D-013, avec une application par défaut déjà inscrite dans `CONTEXT.md`. Le travail peut avancer ainsi, mais les trois choix portent sur le résultat visible et ne sont pas réversibles à coût nul.",
+      "action_attendue": "Confirmer ou corriger trois arbitrages. Recommandation de l’orchestrateur : confirmer les trois. Un seul arbitrage est réellement bloquant pour la suite immédiate, la commande de preuve en D-012 : sans elle, aucune tâche applicative ne peut franchir la porte de conformité, puisque la phase de test à cinq volets n’a aucune commande à exécuter.",
+      "statut": "ouvert",
+      "detail_par_arbitrage": [
+        "D-011, emplacement : code à la racine du dépôt, sans sous-dossier projet/. Recommandation : confirmer.",
+        "D-012, preuve : scripts/verifier.sh en langage shell, sans PHPUnit ni Cypress, conformément à l’exclusion du cahier des charges. Recommandation : confirmer. Arbitrage bloquant pour la suite immédiate.",
+        "D-013, racine du site : DocumentRoot sur public, plus une règle de réécriture pour les adresses sans extension. Recommandation : confirmer, car le cahier des charges tel quel rendrait downloadable le fichier de configuration de la base."
+      ]
     }
   ],
   "journal": [
@@ -1029,16 +1400,65 @@
       "evenement": "decision",
       "tache": "D-010",
       "detail": "Schéma de la version 1 visé ; pas de migration anticipée vers la version 2."
+    },
+    {
+      "horodatage": "2026-09-30T08:29:00Z",
+      "agent": "orchestrateur",
+      "evenement": "blocage",
+      "tache": "B-002",
+      "detail": "Commit et push refusés par la couche de permissions de la session : aucune commande git n'est autorisée. Blocage consigné, aucun fichier applicatif modifié."
+    },
+    {
+      "horodatage": "2026-09-30T09:22:11Z",
+      "agent": "orchestrateur",
+      "evenement": "detection",
+      "tache": "T-009",
+      "detail": "CDC/cdc.md est plus récent que CONTEXT.md : le contexte était périmé. Blocage B-001 levé, le cahier des charges réel est déposé."
+    },
+    {
+      "horodatage": "2026-09-30T09:22:11Z",
+      "agent": "orchestrateur",
+      "evenement": "cadrage",
+      "tache": "T-009",
+      "detail": "CDC/cdc.md lu en entier, 321 lignes, dix sections. CONTEXT.md réécrit en dix sections : finalité, périmètre, hors périmètre, treize contraintes, neuf choix techniques, conventions, six jalons, sept critères d’acceptation, sept zones d’ombre, traçabilité."
+    },
+    {
+      "horodatage": "2026-09-30T09:22:11Z",
+      "agent": "orchestrateur",
+      "evenement": "constat",
+      "tache": "T-009",
+      "detail": "Trois défauts du cahier des charges relevés : son Dockerfile ne déplace pas la racine du site alors que ses adresses l’exigent, ce qui rendrait téléchargeable le fichier de configuration de la base ; il se contredit sur la version de PHP entre 8.2 et au moins 8.0 ; il installe mysqli sans l’exiger nulle part."
+    },
+    {
+      "horodatage": "2026-09-30T09:22:11Z",
+      "agent": "orchestrateur",
+      "evenement": "decision",
+      "tache": "T-009",
+      "detail": "Sept décisions consignées, de D-011 à D-017 : emplacement, commande de preuve, racine du site, mots de passe, pilote d’accès, version de PHP, point d’amorçage."
+    },
+    {
+      "horodatage": "2026-09-30T09:22:11Z",
+      "agent": "orchestrateur",
+      "evenement": "decoupage",
+      "tache": "T-009",
+      "detail": "Onze tâches créées, de T-012 à T-022, ordonnées par dépendance : une tâche de configuration du dépôt, trois de conteneur et de base, six de code applicatif, une de preuve et de documentation."
+    },
+    {
+      "horodatage": "2026-09-30T09:22:11Z",
+      "agent": "orchestrateur",
+      "evenement": "blocage",
+      "tache": "B-002",
+      "detail": "Diagnostic de B-002 rectifié : la liste blanche restrictive vient de opencode.json, pas de la session. T-012 créée pour la rétablir, et B-003 ouvert pour faire confirmer les trois arbitrages du cahier des charges."
     }
   ],
-  "chiffres": {
-    "a_faire": 1,
-    "en_cours": 0,
+"chiffres": {
+    "a_faire": 11,
+    "en_cours": 1,
     "en_revue": 0,
     "validee": 10,
     "rejetee": 0,
     "bloquee": 0,
     "annulee": 0,
-    "total": 11
+    "total": 22
   }
 }

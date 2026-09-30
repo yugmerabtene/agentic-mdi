@@ -1,144 +1,152 @@
-# Contexte de travail — agentic-mdi
+# Contexte de travail — application de gestion utilisateur
 
-Traduit du dossier `CDC/`. Tenu par l'orchestrateur, ne pas modifier à la
-main.
-
-> **Gabarit initial.** Le dossier `CDC/` ne contient pas encore de cahier des
-> charges. Dès que vous y déposez le vôtre, l'orchestrateur remplace ce
-> fichier intégralement selon la compétence `cadrage`.
+Traduit de `CDC/cdc.md`. Tenu par l'orchestrateur, ne pas modifier à la main.
 
 ---
 
 ## 1. Finalité
 
-Système agentique opencode pour ce dépôt : un orchestrateur unique qui reçoit
-un cahier des charges, en fait un contexte de travail, découpe en tâches
-vérifiables, délègue à trois sous-agents spécialisés, et tient un suivi
-horodaté. Le système sert l'utilisateur : il doit pouvoir revenir après une
-interruption et retrouver en trois lignes l'état exact du projet.
+Fournir à un développeur une base d'authentification réutilisable — inscription,
+connexion, déconnexion, tableau de bord protégé — qui démarre d'une seule
+commande dans un environnement de laboratoire reproductible, sans framework et
+sans ressource distante.
 
 ## 2. Périmètre
 
-- Configuration opencode : `opencode.json`, `.opencode/agents/`,
-  `.opencode/skills/`.
-- Un agent primaire `orchestrateur`, trois sous-agents `developpeur`,
-  `code-reviewer`, `devops`.
-- Le dossier `CDC/` en entrée, `CONTEXT.md` en sortie de cadrage.
-- `suivi.json` comme mémoire horodatée.
-- `./check-secrets.sh` comme garde-fou avant commit.
-- Un modèle unique pour tous les agents : `opencode/big-pickle`.
+- Inscription avec validation double, côté navigateur et côté serveur, et
+  unicité de l'adresse électronique vérifiée en base.
+- Connexion par adresse électronique et mot de passe, ouverture de session
+  régénérée, redirection vers le tableau de bord.
+- Déconnexion détruisant la session et supprimant le cookie.
+- Tableau de bord accessible uniquement avec une session valide.
+- Pile conteneurisée : Apache avec PHP, MySQL, un fichier de composition
+  Docker.
+- Script d'initialisation du schéma, et documentation de démarrage.
 
 ## 3. Hors périmètre
 
-- Aucun service externe, aucune connexion réseau pour le fonctionnement du
-  système.
-- Aucune donnée réelle de client. Les livrables restent des environnements de
-  laboratoire.
-- L'orchestrateur n'écrit pas de code applicatif.
-- Aucune automatisation de test du système lui-même : la validation passe par
-  `jq -e .`, un contrôle JSON, et un contrôle de configuration au démarrage.
+- Les fonctionnalités secondaires du cahier des charges (section 2.2) : profil,
+  changement de mot de passe, réinitialisation par courriel, suppression de
+  compte. Elles sont renvoyées à une version ultérieure.
+- Les évolutions de la section 10 du cahier des charges : double facteur,
+  connexion OAuth, rôles, interface de programmation, journalisation, limitation
+  de débit, PHPUnit et Cypress.
+- Tout framework PHP ou JavaScript, toute ressource distante (CDN), toute
+  connexion à un service externe.
+- Le système agentique lui-même (`opencode.json`, `.opencode/`, `AGENTS.md`,
+  `suivi.json`), qui reste l'outillage de ce dépôt et non une partie de
+  l'application livrée.
 
 ## 4. Contraintes imposées
 
 | Contrainte | Origine | Vérification |
 | --- | --- | --- |
-| Un seul modèle, `opencode/big-pickle` | Demande utilisateur | `opencode.json` et les quatre agents |
-| Attendre un cahier des charges dans `CDC/` | Demande utilisateur | Compétence `cadrage` |
-| Le cahier des charges devient `CONTEXT.md` | Demande utilisateur | Compétence `cadrage` |
-| Trois sous-agents imposés | Demande utilisateur | `opencode.json` |
-| Un suivi JSON horodaté obligatoire | Demande utilisateur | Compétence `suivi` |
-| Phase de test à cinq volets | Demande utilisateur | Compétence `tests` |
-| Le `devops` tient les secrets | Demande utilisateur | Compétence `ops` |
-| Agents optimisés pour le jeton, sans perdre en justesse | Demande utilisateur | `compaction`, `tool_output`, section 14 de `AGENTS.md` |
-| Aucun secret en clair | Règle permanente du poste | `./check-secrets.sh` |
-| Vocabulaire **LAB** | Règle permanente du poste | Tous les documents |
+| PHP 8.2, sans framework | CDC §3.1, §6 | `FROM php:8.2-apache`, aucun paquet de framework |
+| JavaScript natif, sans framework ni CDN | CDC §3.1, §6 | Aucune ressource externe dans les pages |
+| MySQL 8.0 | CDC §3.1 | `image: mysql:8.0` |
+| Base `gestion_users`, table `users` aux sept colonnes imposées | CDC §4.1 | `app/sql/init.sql` |
+| Hashage bcrypt par `password_hash` | CDC §4.3 | Aucun mot de passe en clair en base |
+| Requêtes préparées | CDC §4.3 | Aucune concaténation de valeur dans une requête |
+| Jeton CSRF sur les formulaires sensibles | CDC §4.3 | Présent à l'émission, vérifié à la réception |
+| Échappement des sorties par `htmlspecialchars` | CDC §4.3 | Aucune donnée utilisateur rendue brute |
+| Erreurs désactivées à l'affichage, journalisées | CDC §4.3 | Aucun message d'exception renvoyé au navigateur |
+| Mots de passe : 8 caractères, une majuscule, une minuscule, un chiffre | CDC §4.4 | Test de validation qui échoue sur `password` |
+| Volume de données persistant | CDC §4.5, §8 | Contrôle après `docker compose restart` |
+| Aucun secret en clair dans le dépôt | Règle permanente du poste | `./check-secrets.sh` renvoie 0 |
+| Vocabulaire **LAB** | Règle permanente du poste | Documentation et messages |
 
 ## 5. Choix techniques
 
 | Sujet | Décision | Justification | Alternative écartée |
 | --- | --- | --- | --- |
-| Arborescence plate | Sept fichiers à la racine, agents et compétences seuls dans `.opencode/` | Conforme à la convention de vos quatorze projets existants, et moins de navigation pour l'agent | Un dossier par type de document |
-| Point d'entrée | `default_agent: orchestrateur`, `build` et `plan` désactivés | Empêcher toute exécution qui contourne l'orchestrateur | Laisser `build` disponible |
-| Permissions dans le JSON, pas dans les agents | Les fichiers d'agent ne portent que le comportement | Une seule source de vérité, pas de conflit entre les deux endroits | Permissions dupliquées dans chaque agent |
-| Contrôle des sous-agents | `task` avec `"*": "deny"` puis autorisation nominative | Un refus explicite retire l'outil de la description donnée au modèle, qui cesse de tenter l'appel | Compter sur la consigne textuelle |
-| Écriture par motif | `edit` avec `"*": "deny"` puis chemins autorisés | Motif large d'abord, étroit ensuite | Permissions larges avec discipline verbale |
-| Suivi | `suivi.json` à la racine | Visible, versionnable, lisible par un humain comme par un agent | Fichier caché ou hors du dépôt |
-| Sept compétences, dont une commune | Une compétence par rôle, plus `common` qui porte la preuve, les secrets, le français, les jetons et le versionnement | Le commun est écrit une seule fois et chargé par tout le monde ; chaque rôle n'ajoute que son propre ajout | Une compétence par notion, ou le commun recopié dans chaque compétence |
-| Commandes | Aucune | Aucune de vos quatorze configurations n'en utilise | Quatre fichiers de commande |
-| Économie de jetons | `tool_output` à 80 lignes, `prune: true`, fenêtre verbatim réduite, `subagent_depth: 1` | Le levier le plus rentable est la troncature des sorties d'outils, pas la compression du prompt | Réduire le nombre d'agents |
-| Secrets | Trois barrières : contrôle local, accroche `pre-push`, contrôle en chaîne sur l'historique | Un secret déjà poussé se révoque, il ne se réécrit pas | Un seul contrôle local |
-| `opencode.json` | JSON strict, sans commentaire, vérifiable par `jq` | La configuration doit rester vérifiable par un outil standard, et lisible par `jq` comme `suivi.json`. Les commentaires qui avaient été ajoutés ont été retirés sur demande explicite : la lecture se fait par la compétence concernée, pas par des annotations dans le fichier | Un fichier annexe de documentation de la configuration |
+| Emplacement du code | Racine du dépôt : `docker-compose.yml`, `app/`, `scripts/` | Le CDC nomme une racine générique `projet/` ; ce dépôt est déjà le projet, et `app/` reprend tel quel l'arborescence du CDC §3.3 | Créer un sous-dossier `projet/` |
+| Racine web | `DocumentRoot` pointé sur `/var/www/html/public` | Le CDC §4.5 déclare les adresses `/register`, `/login`, `/dashboard`, `/logout`, mais son Dockerfile laisse `DocumentRoot` sur la racine de l'application : les pages seraient alors servies sous `/public/` et `src/config/database.php` serait téléchargeable | Laisser la racine web sur `/var/www/html` |
+| Adresses | Réécriture interne vers les fichiers `.php`, via `.htaccess` | Le CDC annonce des adresses sans extension et active `mod_rewrite` dans son Dockerfile, mais ne fournit pas la règle | Exposer `/register.php` |
+| Version de PHP | 8.2 | La section 3.1 et le Dockerfile du CDC demandent 8.2 ; la section 6 dit « ≥ 8.0 », ce qui est une contradiction interne du CDC, tranchée en faveur de la version la plus précise | 8.0, qui refuse des fonctions utilisées ici |
+| Accès base de données | PDO exclusivement | Le CDC §4.3 impose PDO et les requêtes préparées ; `mysqli` n'est exigé nulle part | Installer et maintenir les deux pilotes |
+| Mots de passe de démonstration | Gabarits dans `.env.example`, valeurs de laboratoire générées à l'exécution | `./check-secrets.sh` refuse toute ligne `...PASSWORD=` suivie d'au moins douze caractères alphanumériques : les valeurs littérales du CDC §4.2 seraient bloquées à la version | Reprendre les valeurs du CDC, refusées par le contrôle |
+| Amorçage du code | `app/src/bootstrap.php`, chargé par chaque page | Sans framework, il faut un point d'entrée unique qui charge la configuration, la session et l'autolochargeur ; le placer dans `src/` le tient hors de la racine web | Une liste de `require` répétée dans les cinq pages |
+| Preuve | `scripts/verifier.sh`, contrôles en langage HTTP et en SQL dans les conteneurs | Le CDC ne donne aucune commande de vérification et renvoie PHPUnit et Cypress aux évolutions futures ; la preuve doit donc être réelle sans framework de test | Déclarer la tâche vérifiée sans commande |
+| Contraintes de sécurité | Fichier `app/src/Config` non requis : configuration par fonction simple lisant l'environnement | L'arbre du CDC prévoit un `database.php` ; une fonction de connexion unique suffit et garde un seul point de lecture de l'environnement | Une couche de configuration objet |
 
 ## 6. Conventions
 
-- **Arborescence** : tout à la racine, sauf `.opencode/agents/` et
-  `.opencode/skills/`.
-- **Nommage** : agents en minuscules avec trait d'union, un seul mot
-  (`orchestrateur`, `developpeur`, `code-reviewer`, `devops`). Compétences de
-  même forme, dossier identique au nom déclaré. Tâches `T-001`, décisions
-  `D-001`, blocages `B-001`.
-- **Langue** : français partout. Aucun caractère étranger dans un texte
-  français.
-- **Erreurs** : remontées avec le contexte, jamais avalées. Un rapport sans
-  mention d'échec est un rapport faux.
-- **Tests** : cinq volets, compétence `tests`.
-- **Versionnement** : une unité de travail par commit, message court en
-  français. Jamais d'astérisque, jamais de réécriture d'historique.
-- **Documentation** : ce qui est décisionnel vit dans `CONTEXT.md`, ce qui
-  est horodaté dans `suivi.json`.
+- **Arborescence** : `docker-compose.yml` et `app/` à la racine, comme le CDC
+  §3.3. `app/public/` est la racine web, `app/src/` la logique applicative,
+  `app/sql/` le schéma, `scripts/` les outils de laboratoire.
+- **Nommage** : PHP en PascalCase pour les classes (`User`, `AuthController`),
+  snake_case pour les fonctions et les méthodes. Les requêtes SQL en
+  minuscules. Un seul espace après l'opérateur de concaténation.
+- **Langue** : français partout, accents obligatoires, guillemets français.
+  Aucun caractère étranger dans un texte français.
+- **Erreurs** : toute exception est journalisée avec son contexte, jamais
+  renvoyée au navigateur. Un rapport sans mention d'échec est un rapport faux.
+- **Tests** : cinq volets, compétence `tests`. Le lint par `php -l` vaut volet
+  unitaire tant qu'aucun framework de test n'est autorisé ; les contrôles en
+  SQL et en langage HTTP valent volets fonctionnel, non fonctionnel,
+  intégration et non régression.
+- **Versionnement** : une unité de travail par message, message court en
+  français, `suivi.json` mis à jour dans le même message.
+- **Documentation** : ce qui est décisionnel vit dans `CONTEXT.md`, ce qui est
+  horodaté dans `suivi.json`, ce qui est opératoire dans `README.md`.
 
 ## 7. Jalons
 
 | Jalon | Livrable | Critère de fin |
 | --- | --- | --- |
-| J1 — Socle | `opencode.json`, quatre agents, sept compétences | Configuration valide, quatre agents listés, une seule instruction par agent |
-| J2 — Pilotage | `CONTEXT.md`, `suivi.json` | Suivi valide, horodaté, décompté |
-| J3 — Garde-fous | `check-secrets.sh`, `.gitignore`, `AGENTS.md` | Le contrôle renvoie `0` sur un dépôt propre, `1` sur un secret |
-| J4 — Économie de jetons | `compaction`, `tool_output`, section 14 | Aucun levier désactivé, aucune régression de justesse |
-| J5 — Votre projet | Contexte et suivi réels depuis `CDC/` | `CONTEXT.md` remplace le gabarit, `suivi.json` porte de vraies tâches |
+| J5 — Socle conteneur | `docker-compose.yml`, `app/Dockerfile`, `app/docker/apache-vhost.conf`, `.env.example` | `docker compose config` valide, deux services, aucun mot de passe en clair, ports 8080 et 3307 publiés |
+| J6 — Base | `app/sql/init.sql` | Base `gestion_users` créée, table `users` conforme aux sept colonnes, montage dans le répertoire d'initialisation du conteneur |
+| J7 — Noyau applicatif | `database.php`, `session.php`, `validator.php`, `User.php`, `AuthController.php`, `UserController.php`, `bootstrap.php` | Chaque fichier passe `php -l`, chaque règle de validation possède un test qui échoue quand elle est enfreinte |
+| J8 — Pages | Les cinq pages, `.htaccess` | Les quatre adresses du CDC répondent, `/dashboard` sans session renvoie une redirection vers `/login` |
+| J9 — Interface | `style.css`, `validation.js`, `app.js` | Aucune ressource externe, validation en temps réel, mise en page mobile avant mise en page large |
+| J10 — Preuve | `scripts/verifier.sh`, `README.md` | Le script rejoue les dix critères du CDC §8 et renvoie 0 ; le README documente le démarrage, les variables et les points d'entrée |
 
 ## 8. Critères d'acceptation du projet
 
-1. Ouvrir opencode dans ce dépôt sélectionne `orchestrateur` sans intervention.
-2. `orchestrateur` est le seul agent primaire dans la barre de tabulation.
-3. Les trois sous-agents sont invocables par l'orchestrateur, et toute
-   délégation non autorisée est refusée.
-4. `code-reviewer` n'a de droit d'écriture que sur `suivi.json` : aucune
-   écriture sur le code, les tests ou la configuration.
-5. `developpeur` n'a aucun droit de délégation.
-6. Chaque agent ne voit que les compétences qui lui sont attribuées.
-7. Un cahier des charges déposé dans `CDC/` produit un `CONTEXT.md` complet
-   suivant le gabarit de la compétence `cadrage`.
-8. `suivi.json` reste valide après chaque écriture et répond à la question
-   « qu'est-ce qui a été validé, quand, et sur quelle preuve ? ».
-9. `./check-secrets.sh` renvoie `0` sur un dépôt propre et `1` sur un secret,
-   sans jamais afficher la valeur.
-10. Aucune tâche n'est `validee` sans les cinq volets de test et les deux portes
-    de revue.
+1. `docker compose up -d` puis l'appel de `scripts/verifier.sh` sur un dépôt
+   propre renvoient 0, sans erreur en sortie.
+2. Une inscription valide crée une ligne dans `users`, et la colonne `password`
+   contient une empreinte bcrypt, jamais le mot de passe saisi.
+3. Une connexion avec des identifiants exacts ouvre une session et mène au
+   tableau de bord ; avec des identifiants faux, elle est refusée par un message
+   qui ne distingue pas « compte inconnu » de « mot de passe faux ».
+4. L'appel de `/dashboard` sans session valide est redirigé vers `/login`.
+5. La déconnexion détruit la session : l'appel suivant de `/dashboard` est de
+   nouveau redirigé, et le cookie de session a disparu.
+6. Les sorties de base ne sont pas injectables : une chaîne de balisage
+   enregistrée comme prénom est rendue échappée dans le tableau de bord.
+7. Les données persistent après `docker compose restart`, et l'absence de
+   réseau externe est vérifiée par l'absence de toute ressource distante dans
+   les pages.
 
 ## 9. Risques et zones d'ombre
 
-| Point | Pourquoi c'est un risque | Arbitrage attendu | Urgence |
+| Point | Pourquoi c'est un risque | Arbitrage retenu | Urgence |
 | --- | --- | --- | --- |
-| `CDC/` ne contient pas encore de cahier des charges | Le contexte reste un gabarit, donc aucune tâche d'un projet réel ne peut être découpée | Déposer le cahier des charges | Haute |
-| La section 5 repose sur des choix par défaut, non validés par vous | Le système est calibré sur vos autres projets, mais sur aucun projet réel de cette façon | Valider ou corriger les choix | Haute |
-| `opencode/big-pickle` est imposé sans variante mesurée | La qualité peut varier selon la nature de la tâche | Mesurer sur un projet réel | Moyenne |
-| La commande de vérification du projet livré est inconnue | `developpeur` ne pourra pas prouver son travail tant qu'elle n'est pas déclarée | Déclarer la commande dans `CONTEXT.md` | Moyenne |
-| La troncature des sorties d'outils à 80 lignes peut masquer la fin d'une longue sortie | Le fichier complet est écrit sur disque, mais l'agent doit penser à aller le lire | Vérifier sur un projet réel | Basse |
-| Aucun test du système lui-même | Une régression de configuration ne serait vue qu'à l'ouverture d'opencode | Valider la configuration à chaque modification | Basse |
+| Le CDC ne fournit aucune commande de vérification, et renvoie PHPUnit et Cypress aux évolutions futures | Sans commande, aucune tâche ne peut produire la preuve exigée par la phase de test | `scripts/verifier.sh` en langage HTTP et SQL, décision consignée en D-012 | Haute — à confirmer |
+| Le CDC ne fixe ni l'emplacement du code ni la place de `scripts/` | Le dépôt est un projet existant, pas une racine neuve | Racine du dépôt, `app/` et `scripts/`, décision D-011 | Moyenne — à confirmer |
+| Le CDC annonce les adresses `/register` et `/login`, mais son Dockerfile ne déplace pas la racine web | Tel quel, le cahier des charges produit un `/public/` dans les adresses et rend `src/` téléchargeable | `DocumentRoot` sur `public`, décision D-013 | Haute — résolu, à confirmer |
+| Contradiction interne du CDC sur la version de PHP (8.2 en §3.1, « ≥ 8.0 » en §6) | Le socle conteneur est figé sur cette valeur | 8.2, la version la plus précise | Basse |
+| `scripts/verifier.sh` devra écrire un fichier `.env` de laboratoire | Un fichier `.env` dans l'arborescence peut être versionné par mégarde | `.env` inscrit au `.gitignore` dès J5, `.env.example` seul versionné, contrôle anti-fuite passé | Haute |
+| Aucune automatisation au-delà du lint PHP | Une régression du code applicatif n'est vue qu'au moment du script | Accepté pour cette version, conformément au CDC §10 | Moyenne |
+| La limitation de débit sur `/login` reste à faire | Une attaque par force brute reste possible | Hors périmètre, renvoyé aux évolutions du CDC §10 | Basse |
 
 ## 10. Traçabilité
 
 | Exigence d'origine | Section | Suivi |
 | --- | --- | --- |
-| Agent orchestrateur qui délègue | 1, 2 | T-001 |
-| Modèle unique `opencode/big-pickle` | 4, 5 | T-001 |
-| Transformation du cahier des charges en contexte | 1, 2 | T-005 |
-| Sous-agent développeur | 2 | T-001 |
-| Sous-agent code-reviewer | 2 | T-001 |
-| Sous-agent DevOps | 2 | T-001 |
-| Compétences par agent, avec une compétence commune à tous | 2 | T-002 |
-| Suivi JSON horodaté | 2, 4 | T-003 |
-| Phase de test à cinq volets | 2, 4 | T-004 |
-| Le `devops` gère les secrets | 2, 4 | T-006 |
-| Agents optimisés pour le jeton | 4, 5 | T-007 |
+| Système agentique, quatre agents, modèle unique | Précédente version, J1 à J4 | T-001 à T-011 |
+| F1 — Inscription, validation double, unicité, bcrypt | CDC §2.1, §4.3, §4.4 | T-015, T-016, T-017, T-018, T-020 |
+| F2 — Connexion, session régénérée, redirection | CDC §2.1, §5.2 | T-015, T-017, T-018, T-020 |
+| F3 — Déconnexion, destruction de session, cookie | CDC §2.1, §5.3 | T-015, T-018, T-020 |
+| F4 — Tableau de bord protégé | CDC §2.1, §5.1 | T-019, T-020 |
+| Stack PHP 8.2, MySQL 8, Apache | CDC §3.1, §3.2, §4.2 | T-013 |
+| Structure de fichiers imposée | CDC §3.3 | T-013 à T-021 |
+| Schéma `users` aux sept colonnes | CDC §4.1 | T-014 |
+| `docker-compose.yml` fonctionnel, `Dockerfile` | CDC §4.2, §7 | T-013 |
+| Mesures de sécurité du tableau §4.3 | CDC §4.3 | T-015, T-016, T-017, T-018 |
+| Règles de validation nom, prénom, courriel, mot de passe | CDC §4.4 | T-016 |
+| Interface responsive, validation en temps réel, sans CDN | CDC §4.5, §6 | T-021 |
+| Persistance après redémarrage | CDC §8 | T-013, T-022 |
+| README de démarrage et documentation des points d'entrée | CDC §7 | T-022 |
+| Critères d'acceptation du CDC §8 | CDC §8 | T-022 |
