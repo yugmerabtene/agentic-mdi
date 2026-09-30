@@ -1,525 +1,510 @@
-/* Feuille de style du laboratoire de gestion des utilisateurs.
+/* Feuille de style de l'application de gestion des utilisateurs.
  *
- * Trois règles gouvernent ce fichier.
- *
- * 1. Aucune ressource distante : aucune police téléchargée, aucune image, aucun
- *    appel vers un service externe. Seules les polices déjà présentes sur le
- *    poste sont utilisées, la pile système se rabattant sur une police libre,
- *    de sorte que la page reste lisible même hors du réseau.
- * 2. Mise en page mobile d'abord : la mise en page étroite est l'état par
- *    défaut, écrit sans une seule requête de média. La mise en page large
- *    n'existe que dans les blocs @media, dont le seuil est une seule constante :
- *    changer la valeur d'un seuil suffit à faire bouger toute la bascule.
- * 3. Unités relatives : les longueurs partent de la racine em, qui vaut la
- *    taille de police choisie par le lecteur dans son navigateur. Aucun pixel
- *    n'est écrit, pour qu'un texte plus grand ou plus petit reste cohérent.
+ * Elle applique la charte graphique de CONTEXT.md §6.1, thème sombre.
+ * Trois règles gouvernent tout le fichier :
+ *   - aucune couleur n'est écrite hors du bloc `:root` ;
+ *   - aucune valeur en pixels : tout se mesure en `rem` ;
+ *   - la mise en page mobile est l'état par défaut, la seule requête de
+ *     rupture se trouve plus bas, à `48rem`, et ne fait qu'élargir.
  */
 
-/* ------------------------------------------------------------------ */
-/* Jetons de présentation : toutes les valeurs réglables sont ici.      */
-/* ------------------------------------------------------------------ */
+/* Palette imposée par la charte, plus les nuances dérivées qui en dépendent.
+   Les douze jetons ci-dessous ne sont déclarés nulle part ailleurs. */
 :root {
-  /* Largeurs. La carte de contenu laisse respirer le texte sans l'étirer
-   * au-delà d'une longueur de ligne confortable à lire. */
-  --largeur-contenu: 42rem; /* environ soixante-dix caractères par ligne */
-  --largeur-max-champ: 26rem; /* un champ de saisie ne dépasse pas la carte */
+  --encre: #0E1420;
+  --surface: #161E2E;
+  --surface-haute: #1E293B;
+  --trait: #26324A;
+  --texte: #E8EDF5;
+  --texte-doux: #93A1B5;
+  --accent: #FF6B1A;
+  --accent-froid: #4C8DFF;
+  --succes: #2FBF71;
+  --erreur: #F0523E;
+  --alerte: #F5B33C;
+  --focus: #FFB27A;
 
-  /* Espacements. L'échelle est un multiple d'un pas unique : doubler une
-   * classe double l'écart, et la mise en page reste rythmée. */
-  --pas: 1rem;
-  --pas-demi: 0.5rem;
-  --pas-double: 2rem;
+  /* Noir de l'ombre portée et voile du halo de focus, déclarés ici pour que le
+     reste de la feuille ne contienne plus aucune couleur. */
+  --noir: #000;
+  --accent-voile: color-mix(in srgb, var(--accent) 25%, transparent);
+  --erreur-voile: color-mix(in srgb, var(--erreur) 12%, transparent);
+  --succes-voile: color-mix(in srgb, var(--succes) 12%, transparent);
+  --ombre-tinte: color-mix(in srgb, var(--noir) 20%, transparent);
 
-  /* Rôles de couleur. Chaque paire de texte sur fond tient le rapport de
-   * contraste de 4,5 pour 1 exigé pour du texte courant. */
-  --fond-page: #eef1f5; /* gris très clair : le blanc fatigue en plein écran */
-  --fond-carte: #ffffff;
-  --texte: #1b2430; /* presque noir, rapport de contraste de 14,5 pour 1 */
-  --texte-doux: #4a5768; /* gris médian, rapport de 7,2 pour 1, réservé aux aides */
-  --texte-inverse: #ffffff;
-  --accent: #0f4c68; /* bleu ardoise, rapport de 8,9 pour 1 sur fond blanc */
-  --accent-fonce: #0a3548; /* état survolé du bouton principal */
-  --trait: #c3ccd8; /* filet des cartes et des champs */
-  --erreur-texte: #99201f; /* rouge sourd, rapport de 8,1 pour 1 sur le fond d'erreur */
-  --erreur-fond: #fdeceb;
-  --erreur-trait: #99201f;
-  --succes-texte: #14603a; /* vert sourd, rapport de 7,4 pour 1 sur le fond de succès */
-  --succes-fond: #e8f5ee;
-  --reussite-barre: #b03a2e; /* couleur de la portion de règle satisfaite */
-  --echec-barre: #c8cdd4; /* couleur de la portion de règle non satisfaite */
+  /* Les deux seules ombres autorisées : celle de la carte, et le halo de
+     focus d'un champ. Elles sont définies une fois, en rem, et réutilisées
+     telles quelles. */
+  --ombre-carte: 0 0.0625rem 0.125rem var(--ombre-tinte);
+  --halo-focus: 0 0 0 0.1875rem var(--accent-voile);
 }
 
-/* ------------------------------------------------------------------ */
-/* Réglages généraux : lisibilité et focus visible.                      */
-/* ------------------------------------------------------------------ */
+/* Remise à zéro : toutes les cases partagent la même largeur de calcul, et le
+   document n'a pas de marge propre. */
 *,
-*::avant,
-*::apres {
-  /* La largeur intrinsèque d'un champ ne déborde plus de son conteneur : sans
-   * cela, un champ dans une carte étroite force un défilement horizontal. */
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
+/* Corps de page : fond bleu nuit, texte clair, pile de polices système sans
+   aucune police distante. La base de 1rem vaut 16 pixels par construction du
+   navigateur, et la hauteur minimale tient le pied de page en bas de l'écran. */
 body.page {
-  /* Marge nulle sur le corps : l'espacement vient des blocs, ce qui évite
-   * deux systèmes de gouttière qui ne se rejoignent jamais. */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   margin: 0;
-  /* Interligne légèrement supérieur à la normale : les lignes restent
-   * lisibles en petit corps sur un fond clair. */
-  line-height: 1.5;
-  /* Pile de polices logicielles et de polices libres, toutes présentes sur le
-   * poste. Aucune police n'est téléchargée. */
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, "Noto Sans", sans-serif;
-  font-size: 1rem;
+  padding: 0 1rem;
+  background-color: var(--encre);
   color: var(--texte);
-  background-color: var(--fond-page);
-  /* Retour à la ligne des chaînes longues, notamment des adresses. */
-  overflow-wrap: break-word;
+  font-family: system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
-a {
-  color: var(--accent);
-}
-
-a:focus-visible,
-button:focus-visible,
-input:focus-visible {
-  /* Contour épais et décalé : il reste lisible sur fond clair comme sur fond
-   * sombre, et il demeure visible même si la couleur d'accent change. */
-  outline: 0.1875rem solid var(--accent);
+/* Focus clavier : un contour clair, épais, décalé de la forme. Il n'est
+   neutralisé sur aucun élément de la page. */
+:focus-visible {
+  outline: 0.1875rem solid var(--focus);
   outline-offset: 0.125rem;
 }
 
-h1,
-h2 {
-  /* Le titre de page reçoit une taille relative au corps, jamais absolue. */
-  font-size: 1.5rem;
-  line-height: 1.25;
-  margin: 0 0 var(--pas);
+/* Colonne de contenu : elle occupe toute la largeur disponible jusqu'à
+   soixante-douze rems, et occupe le haut de l'écran restant pour pousser le
+   pied de page vers le bas. */
+.contenu {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-block: 2rem;
 }
 
-p {
-  margin: 0 0 var(--pas);
-}
-
-/* ------------------------------------------------------------------ */
-/* En-tête et navigation : empilés d'abord, en ligne ensuite.            */
-/* ------------------------------------------------------------------ */
+/* En-tête : la marque à gauche, la navigation à droite, sur une seule ligne
+   tant que la place manque, empilée ensuite. */
 .entete {
-  /* Sur téléphone, l'en-tête est une bande pleine largeur collée au bord de
-   * l'écran : le contenu ne perd pas de largeur utile. */
-  background-color: var(--fond-carte);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-block: 1rem;
   border-bottom: 0.0625rem solid var(--trait);
-  padding: var(--pas);
 }
 
+/* Marque du site : un niveau de titre compact, en graisse 700. */
 .marque {
+  margin: 0;
+  color: var(--texte);
+  font-size: 1.25rem;
   font-weight: 700;
-  margin: 0 0 var(--pas-demi);
+  letter-spacing: -0.01em;
 }
 
+/* Liste de navigation : les puces disparaissent, les liens deviennent les
+   cibles tactiles. */
 .liste-navigation {
-  /* Liste de liens empilée. Chaque lien reçoit un retrait vertical : la cible
-   * reste confortable au doigt sans que la liste paraisse détachée. */
-  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   margin: 0;
   padding: 0;
+  list-style: none;
 }
 
-.lien-navigation {
-  display: block;
-  padding: 0.5rem 0;
-  text-decoration: none;
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.lien-navigation[aria-current="page"] {
-  /* L'adresse courante est signalée par un fond, pas seulement par une
-   * couleur : le signe reste lisible en cas de daltonisme. */
-  background-color: var(--fond-page);
-  border-radius: 0.25rem;
-  padding-left: var(--pas-demi);
-}
-
-/* ------------------------------------------------------------------ */
-/* Contenu : une colonne étroite, et la carte qui enveloppe les pages.  */
-/* ------------------------------------------------------------------ */
-.contenu {
-  /* Marge automatique : la colonne reste centrée quelle que soit la largeur
-   * de la fenêtre, et la marge du cadre vaut toujours un pas. */
-  width: 100%;
-  max-width: var(--largeur-contenu);
-  margin: 0 auto;
-  padding: var(--pas);
-}
-
-.carte {
-  background-color: var(--fond-carte);
-  border: 0.0625rem solid var(--trait);
-  /* Rayon doux : il adoucit les angles sans effacer la forme du formulaire. */
+/* Onglet de navigation : cible de deux rems quarante-quatre de côté au
+   minimum, visible au survol et underlined. */
+.element-navigation a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding-inline: 1rem;
   border-radius: 0.5rem;
-  padding: var(--pas);
+  color: var(--texte-doux);
+  text-decoration: none;
 }
 
-.titre-page {
-  margin: 0 0 var(--pas);
+.element-navigation a:hover {
+  background-color: var(--surface-haute);
+  color: var(--texte);
 }
 
-/* ------------------------------------------------------------------ */
-/* Formulaires : la règle de base vaut pour tous les champs.             */
-/* ------------------------------------------------------------------ */
-.champ {
-  /* Chaque champ occupe une ligne entière sur téléphone : la cible de saisie
-   * ne descend jamais sous une largeur confortable. */
-  margin-bottom: var(--pas);
-}
-
-.etiquette {
-  display: block;
+/* Onglet courant : la couleur froide et le soulignement, deux canaux
+   simultanés, pour que l'onglet actif se lise sans la couleur. */
+.element-navigation a[aria-current='page'] {
+  background-color: var(--surface-haute);
+  color: var(--accent-froid);
   font-weight: 600;
-  margin-bottom: var(--pas-demi);
+  text-decoration: underline;
+  text-decoration-thickness: 0.125rem;
+  text-underline-offset: 0.25rem;
 }
 
+/* Pied de page : séparé du contenu par un filet, texte secondaire. */
+.pied {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-block: 1.5rem;
+  border-top: 0.0625rem solid var(--trait);
+}
+
+.mention {
+  margin: 0;
+  color: var(--texte-doux);
+  font-size: 0.875rem;
+}
+
+/* Carte : le seul panneau de la page, surface légèrement surélevée, filet
+   discret, rayon généreux, une ombre très faible. */
+.carte {
+  width: 100%;
+  max-width: 42rem;
+  padding: 1.5rem;
+  background-color: var(--surface);
+  border: 0.0625rem solid var(--trait);
+  border-radius: 0.75rem;
+  box-shadow: var(--ombre-carte);
+}
+
+/* Titre de page : premier niveau de l'échelle typographique, interlettrage
+   légèrement resserré. */
+.titre-page {
+  margin: 0 0 1.5rem;
+  color: var(--texte);
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+/* Formulaire : largeur de lecture limitée à quarante-deux rems, champs
+   empilés. */
+.formulaire {
+  display: flex;
+  flex-direction: column;
+  max-width: 42rem;
+  margin: 0;
+}
+
+/* Champ : étiquette au-dessus, saisie en dessous, message d'erreur sous la
+   saisie. L'espacement vertical vient de l'échelle de rythme. */
+.champ {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-block-end: 1.5rem;
+}
+
+/* Étiquette : texte secondaire en gras, elle reste lisible sur fond sombre. */
+.etiquette {
+  color: var(--texte);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Saisie : surface, filet discret, rayon d'un demi-rem, hauteur d'une cible
+   tactile confortable. Le texte saisi est échappé par le serveur, la saisie
+   elle-même n'affiche aucune couleur propre. */
 .saisie {
   width: 100%;
-  max-width: var(--largeur-max-champ);
-  /* Un champ de saisie atteint au moins la hauteur d'une ligne de texte, pour
-   * que le doigt vise juste sans viser précisément. */
   min-height: 2.75rem;
-  padding: 0.5rem 0.625rem;
-  font-size: 1rem;
-  font-family: inherit;
-  color: var(--texte);
-  background-color: var(--fond-carte);
+  padding: 0.5rem 1rem;
+  background-color: var(--surface);
   border: 0.0625rem solid var(--trait);
-  border-radius: 0.25rem;
+  border-radius: 0.5rem;
+  color: var(--texte);
+  font: inherit;
 }
 
-.saisie:disabled {
-  background-color: var(--fond-page);
+/* Saisie au clavier : bordure accentuée et halo translucide, en plus du
+   contour global qui reste posé. */
+.saisie:focus-visible {
+  border-color: var(--accent);
+  box-shadow: var(--halo-focus);
 }
 
-/* Un champ marqué invalide par le script porte un trait rouge, doublé d'un
- * liseré, jamais seulement une couleur. Le message d'erreur qui l'accompagne
- * ajoute le symbole d'avertissement. */
-.saisie[aria-invalid="true"] {
-  border-color: var(--erreur-trait);
-  border-width: 0.125rem;
-  /* Liseré vertical à gauche du champ, dessiné sans image. */
-  background-image: linear-gradient(var(--erreur-trait), var(--erreur-trait));
-  background-repeat: no-repeat;
-  background-size: 0.25rem 100%;
-  background-position: left center;
-  padding-left: 0.875rem;
+/* Saisie refusée par le serveur : la bordure passe à la couleur d'erreur, le
+   message sous le champ porte lui aussi trois canaux. */
+.saisie[aria-invalid='true'] {
+  border-color: var(--erreur);
 }
 
+/* Aide de saisie : la règle de forme du mot de passe, en texte secondaire. */
 .aide {
-  font-size: 0.875rem;
+  margin: 0;
   color: var(--texte-doux);
-  margin: var(--pas-demi) 0 0;
+  font-size: 0.875rem;
 }
 
-/* ------------------------------------------------------------------ */
-/* Messages : couleur, trait et glyphe, jamais la seule couleur.          */
-/* ------------------------------------------------------------------ */
-.champ-erreur,
-.message-erreur {
-  color: var(--erreur-texte);
-  background-color: var(--erreur-fond);
-  border: 0.0625rem solid var(--erreur-trait);
-  /* L'épaisseur du trait de gauche signale l'erreur sans dépendre de la
-   * perception des couleurs : c'est la différence principale avec un texte
-   * simplement rouge. */
-  border-left-width: 0.25rem;
-  border-radius: 0.25rem;
-  padding: 0.5rem 0.625rem;
-  margin: var(--pas-demi) 0 0;
-  font-size: 0.9375rem;
+/* Bouton : variante secondaire par défaut, cible d'au moins deux rems
+   soixante-quinze de côté, transition limitée à l'opacité et au
+   déplacement. */
+.bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  padding: 0.5rem 1.5rem;
+  background-color: transparent;
+  border: 0.0625rem solid var(--accent);
+  border-radius: 0.5rem;
+  color: var(--accent);
+  font: inherit;
   font-weight: 600;
+  cursor: pointer;
+  transition: opacity 120ms ease, transform 120ms ease;
 }
 
-.champ-erreur::before,
-.message-erreur::before {
-  /* Triangle d'avertissement en variante textuelle : un glyphe de la police
-   * système, donc aucune police distante n'est nécessaire. */
-  content: "\26A0";
-  margin-right: 0.375rem;
+.bouton:hover {
+  opacity: 0.85;
+}
+
+.bouton:active {
+  transform: translateY(0.0625rem);
+}
+
+/* Bouton principal : fond accentué, texte encre, même hauteur. */
+.bouton-principal {
+  background-color: var(--accent);
+  color: var(--encre);
+}
+
+/* Formulaire de déconnexion : bouton secondaire, aligné sur la largeur du
+   contenu. */
+.formulaire-deconnexion {
+  margin-block-start: 1.5rem;
+}
+
+/* Lien courant de navigation secondaire, sous les formulaires. */
+.lien-secondaire {
+  margin: 1.5rem 0 0;
+  color: var(--texte-doux);
+  font-size: 0.875rem;
+}
+
+/* Lien d'action : couleur froide et soulignement permanent. */
+.lien {
+  color: var(--accent-froid);
+  text-decoration: underline;
+  text-decoration-thickness: 0.0625rem;
+  text-underline-offset: 0.25rem;
+}
+
+.lien:hover {
+  text-decoration-thickness: 0.125rem;
+}
+
+/* Message d'erreur de champ : trois canaux simultanés, la couleur seule ne
+   porte jamais l'information. Un filet gauche de trois pixels convertis en rem,
+   une teinte d'erreur à douze pour cent, et un glyphe d'avertissement posé
+   par le pseudo-élément qui suit. */
+.champ-erreur {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--erreur-voile);
+  border-left: 0.1875rem solid var(--erreur);
+  border-radius: 0 0.5rem 0.5rem 0;
+  color: var(--erreur);
+  font-size: 0.875rem;
+}
+
+/* Glyphe d'avertissement du message d'erreur : un triangle d'avertissement,
+   écrit par code d'échappement pour que la feuille reste en ASCII. */
+.champ-erreur::before {
+  content: '\26A0';
+  flex: 0 0 auto;
+  line-height: 1.5;
+}
+
+/* Un message masqué par le navigateur doit le rester : la classe impose un
+   affichage en ligne, elle annulerait sinon l'attribut `hidden`. */
+.champ-erreur[hidden] {
+  display: none;
+}
+
+/* Message de session : bandeau à filet gauche de quatre pixels convertis en
+   rem, fond teinté à douze pour cent, texte courant. Le filet et la teinte
+   distinguent le refus de la confirmation sans dépendre de la seule couleur. */
+.message-erreur,
+.message-succes {
+  margin: 0 0 1.5rem;
+  padding: 0.5rem 1rem;
+  border-left: 0.25rem solid var(--erreur);
+  border-radius: 0 0.5rem 0.5rem 0;
+  color: var(--texte);
 }
 
 .message-erreur {
-  margin: 0 0 var(--pas);
+  background-color: var(--erreur-voile);
 }
 
 .message-succes {
-  color: var(--succes-texte);
-  background-color: var(--succes-fond);
-  border: 0.0625rem solid var(--succes-texte);
-  border-left-width: 0.25rem;
-  border-radius: 0.25rem;
-  padding: 0.5rem 0.625rem;
-  margin: 0 0 var(--pas);
-  font-weight: 600;
+  background-color: var(--succes-voile);
+  border-left-color: var(--succes);
 }
 
-/* Message d'erreur que le script vient de remettre en évidence après le retour
- * sur l'onglet : il est signalé une fois, puis l'anomalie cesse. */
-.message-erreur[data-reactive="1"],
-.champ-erreur[data-reactive="1"] {
-  animation: signalement 2s ease-out 1;
+/* Signalement d'un message à l'ouverture de l'onglet : une seule apparition,
+   cent cinquante milliseconds au plus, sur l'opacité seule. */
+[data-reactive] {
+  animation: signalement 120ms ease-out 1;
 }
 
 @keyframes signalement {
   from {
-    outline: 0.25rem solid var(--erreur-trait);
-    outline-offset: 0.125rem;
+    opacity: 0.4;
   }
 
   to {
-    outline: 0.25rem solid transparent;
-    outline-offset: 0.125rem;
+    opacity: 1;
   }
 }
 
-/* Les versions de navigateur qui réduisent les animations n'en reçoivent
- * aucune : le message reste signalé par un contour permanent. */
-@media (prefers-reduced-motion: reduce) {
-  .message-erreur[data-reactive="1"],
-  .champ-erreur[data-reactive="1"] {
-    animation: none;
-    outline: 0.1875rem solid var(--erreur-trait);
-    outline-offset: 0.125rem;
-  }
-}
-
-/* ------------------------------------------------------------------ */
-/* Boutons : hauteur confortable et état survolé explicite.              */
-/* ------------------------------------------------------------------ */
-.bouton {
-  font-family: inherit;
-  font-size: 1rem;
-  font-weight: 600;
-  min-height: 2.75rem;
-  padding: 0.625rem 1.25rem;
-  border-radius: 0.25rem;
-  border: 0.0625rem solid var(--accent);
-  background-color: var(--fond-carte);
-  color: var(--accent);
-  cursor: pointer;
-}
-
-.bouton-principal {
-  background-color: var(--accent);
-  border-color: var(--accent);
-  color: var(--texte-inverse);
-  width: 100%;
-  max-width: var(--largeur-max-champ);
-}
-
-.bouton:hover {
-  background-color: var(--accent-fonce);
-  border-color: var(--accent-fonce);
-  color: var(--texte-inverse);
-}
-
-.lien-secondaire {
-  margin-top: var(--pas);
-  color: var(--texte-doux);
-  font-size: 0.9375rem;
-}
-
-/* ------------------------------------------------------------------ */
-/* Force du mot de passe : quatre règles comptées, une jauge en parts.   */
-/* ------------------------------------------------------------------ */
+/* Jauge de force du mot de passe : un bloc discret sous le champ, construit
+   par le navigateur. */
 .force {
-  margin: var(--pas-demi) 0 0;
-  max-width: var(--largeur-max-champ);
-  font-size: 0.875rem;
-  color: var(--texte-doux);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-block-start: 0.5rem;
 }
 
+/* Résumé de la jauge : texte secondaire, chiffres tabulaires pour que le
+   compteur ne bouge pas en largeur. */
+.force-resume {
+  margin: 0;
+  color: var(--texte-doux);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Rail de la jauge : une surface surélevée, la portion remplie est posée par
+   le navigateur et vient du jeton d'accent. */
 .force-jauge {
   display: block;
   height: 0.5rem;
-  /* La portion non satisfaite : c'est le fond de la jauge. */
-  background-color: var(--echec-barre);
-  border-radius: 0.25rem;
   overflow: hidden;
+  background-color: var(--surface-haute);
+  border-radius: 0.25rem;
 }
 
 .force-part {
   display: block;
   height: 100%;
-  /* La portion satisfaite passe devant, sa largeur donne la proportion. */
-  width: 0%;
-  background-color: var(--reussite-barre);
-  transition: width 120ms linear;
+  width: 0;
+  background-color: var(--accent);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .force-part {
-    transition: none;
-  }
-}
-
+/* Détail des règles : une liste de puces chips, sans puce, posée en ligne. */
 .force-detail {
-  margin: var(--pas-demi) 0 0;
-}
-
-.force-regle {
-  /* La liste est décorée par un pseudo-élément : le texte reste sélectionnable
-   * et la règle d'accessibilité reste simple à lire. */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin: 0;
+  padding: 0;
   list-style: none;
-  margin: 0;
-  padding-left: 1.125rem;
-  color: var(--texte-doux);
 }
 
-.force-regle::before {
-  /* Cercle vide : règle non satisfaite. */
-  content: "\25CB";
-  display: inline-block;
-  width: 1.125rem;
-  margin-left: -1.125rem;
-}
-
-.force-regle[data-satisfaite="1"] {
-  color: var(--succes-texte);
-  font-weight: 600;
-}
-
-.force-regle[data-satisfaite="1"]::before {
-  /* Coche : règle satisfaite. Le glyphe, et non la couleur, distingue les
-   * deux états. */
-  content: "\2713";
-}
-
-/* ------------------------------------------------------------------ */
-/* Tableau de bord : fiche sur une colonne, deux colonnes plus tard.     */
-/* ------------------------------------------------------------------ */
-.accueil-connecte {
-  color: var(--texte-doux);
-}
-
-.fiche {
-  margin: 0;
-  display: grid;
-  /* Une seule colonne par défaut : libellé au-dessus, valeur en dessous, ce
-   * qui reste lisible dès que la largeur se réduit. */
-  grid-template-columns: 1fr;
-  gap: 0 var(--pas);
-}
-
-.fiche-libelle {
-  font-weight: 600;
-  color: var(--texte-doux);
-}
-
-.fiche-valeur {
-  margin: 0 0 var(--pas-demi);
-  /* Valeur longue : elle s'étale sur plusieurs lignes plutôt que de déborder. */
-  overflow-wrap: anywhere;
-}
-
-.formulaire-deconnexion {
-  margin-top: var(--pas);
-  padding-top: var(--pas);
-  border-top: 0.0625rem solid var(--trait);
-}
-
-/* ------------------------------------------------------------------ */
-/* Pied de page.                                                        */
-/* ------------------------------------------------------------------ */
-.pied {
-  width: 100%;
-  max-width: var(--largeur-contenu);
-  margin: 0 auto;
-  padding: var(--pas);
+/* Règle non satisfaite : texte secondaire et pastille creuse. */
+.force-regle {
   color: var(--texte-doux);
   font-size: 0.875rem;
 }
 
-.mention {
+.force-regle::before {
+  content: '\25CB';
+  padding-inline-end: 0.5rem;
+}
+
+/* Règle satisfaite : couleur de validation et coche. */
+.force-regle[data-satisfaite='1'] {
+  color: var(--succes);
+}
+
+.force-regle[data-satisfaite='1']::before {
+  content: '\2713';
+}
+
+/* Fiche du tableau de bord : une pile sur mobile, deux colonnes à partir de
+   quarante-huit rems. Aucune largeur de colonne n'est écrite en dur, la
+   colonne d'étiquettes s'ajuste à son contenu. */
+.fiche {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem 1.5rem;
   margin: 0;
 }
 
-/* ------------------------------------------------------------------ */
-/* Page d'erreur générique. Le script de page_erreur rend un corps nu,   */
-/* sans la classe page : ces sélecteurs ne portent donc pas sur la classe.*/
-/* ------------------------------------------------------------------ */
-body > h1,
-body > p {
-  width: 100%;
-  max-width: var(--largeur-contenu);
-  margin: 0 auto var(--pas);
-  padding: 0 var(--pas);
+/* Étiquette de la fiche : texte secondaire. */
+.fiche-libelle {
+  color: var(--texte-doux);
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
-/* ------------------------------------------------------------------ */
-/* Bascule vers la mise en page large. Un seul seuil, 48rem, soit 768    */
-/* pixels avec la police par défaut, pour toutes les requêtes de média de */
-/* ce fichier. Sous ce seuil, rien de ce bloc ne s'applique.             */
-/* ------------------------------------------------------------------ */
+/* Valeur de la fiche : texte courant, chiffres tabulaires pour aligner les
+   dates et les compteurs. */
+.fiche-valeur {
+  margin: 0;
+  color: var(--texte);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* Phrase d'accueil du tableau de bord. */
+.accueil-connecte {
+  margin: 0 0 1.5rem;
+  color: var(--texte-doux);
+}
+
+/* Unique point de rupture de la feuille : tout ce bloc ne fait qu'élargir la
+   mise en page déjà écrite pour mobile. */
 @media (min-width: 48rem) {
+  body.page {
+    padding-inline: 2rem;
+  }
+
   .entete {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--pas);
-    padding: var(--pas) var(--pas-double);
-  }
-
-  .marque {
-    margin-bottom: 0;
-  }
-
-  .liste-navigation {
-    display: flex;
-    gap: var(--pas);
-  }
-
-  .lien-navigation {
-    padding: 0.25rem 0;
-  }
-
-  .lien-navigation[aria-current="page"] {
-    padding-left: var(--pas-demi);
+    padding-block: 1.5rem;
   }
 
   .contenu {
-    padding: var(--pas-double) var(--pas);
+    padding-block: 3rem;
   }
 
   .carte {
-    padding: var(--pas-double);
+    padding: 2rem;
   }
 
-  .bouton-principal {
-    /* Le bouton principal cesse d'être étiré : il retrouve sa taille
-     * naturelle dès que la place existe. */
-    width: auto;
-    min-width: 12rem;
+  .liste-navigation {
+    gap: 1rem;
   }
 
   .fiche {
-    /* Deux colonnes : libellé à gauche, valeur à droite, la première
-     * colonne se dimensionne sur le plus long libellé de la fiche. */
-    grid-template-columns: max-content 1fr;
-    column-gap: var(--pas);
+    grid-template-columns: auto 1fr;
+  }
+}
+
+/* Demande de moins d'animations : tout signalement et toute transition sont
+   neutralisés, et le message d'erreur garde un contour permanent pour rester
+   visible. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none;
+    transition: none;
   }
 
-  .fiche-libelle {
-    text-align: right;
-  }
-
-  .fiche-valeur {
-    margin-bottom: 0;
-    align-self: start;
-    padding-bottom: var(--pas-demi);
-  }
-
-  .pied {
-    padding: var(--pas) var(--pas-double);
+  [data-reactive] {
+    outline: 0.125rem solid var(--erreur);
+    outline-offset: 0.125rem;
   }
 }

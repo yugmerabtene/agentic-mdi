@@ -146,17 +146,18 @@ les colonnes s'alignent.
 **Composants.**
 - Champ : fond `--surface`, bordure `--trait`, rayon `0.5rem`, hauteur
   `2.75rem`, texte `--texte`. Au focus, bordure `--accent` et halo
-  `0 0 0 3px` en `accent` à vingt-cinq pour cent d'opacité.
+  `0 0 0 0.1875rem` en `accent` à vingt-cinq pour cent d'opacité.
 - Bouton principal : fond `--accent`, texte `--encre`, graisse 600, rayon
-  `0.5rem`, hauteur minimale `2.75rem`. Bouton secondaire : fond transparent,
-  bordure `--accent`, texte `--accent`.
+  `0.5rem`, hauteur minimale `2.75rem`. Bouton secondaire : fond
+  `transparent`, bordure `--accent`, texte `--accent`.
 - Message d'erreur de champ : trois canaux simultanés, couleur `--erreur`,
-  filet gauche `3px`, et glyphe d'avertissement en pseudo-élément. La couleur
-  seule ne suffit jamais, l'information doit rester lisible sans la couleur.
-- Message de session : bandeau à filet gauche `4px`, fond teinté à douze pour
-  cent, texte en `--texte`.
+  filet gauche `0.1875rem`, et glyphe d'avertissement en pseudo-élément. La
+  couleur seule ne suffit jamais, l'information doit rester lisible sans la
+  couleur.
+- Message de session : bandeau à filet gauche `0.25rem`, fond teinté à douze
+  pour cent, texte en `--texte`.
 - Carte : fond `--surface`, bordure `--trait`, rayon `0.75rem`, ombre portée
-  unique `0 1px 2px` en noir à vingt pour cent.
+  unique `0 0.0625rem 0.125rem` en noir à vingt pour cent.
 
 **Interdits graphiques.** Aucune ressource distante : ni police, ni image, ni
 icône, ni feuille de style secondaire, ni contenu tiers. Aucun effet de verre
@@ -167,9 +168,10 @@ en `rem`. Aucun dégradé décoratif, à l'exception d'un fond de page unique et
 très sobre. Thème sombre uniquement dans cette version, sans bascule de thème.
 
 **Accessibilité, seuils chiffrés.** Texte courant au moins `4.5:1` de contraste
-sur son fond. Texte de grande taille au moins `3:1`. Cible de bouton au moins
-`44rem` de côté, donc `2.75rem` de hauteur pour un bouton pleine largeur. Le
-focus clavier doit rester visible sur fond sombre, jamais supprimé.
+sur son fond. Texte de grande taille au moins `3:1`. Cible tactile d'au moins
+`2.75rem` de côté, soit `44px` à la racine `1rem` égale à `16px`, ce qui est
+la taille minimale recommandée pour un bouton pleine largeur. Le focus clavier
+doit rester visible sur fond sombre, jamais supprimé.
 
 **Porte graphique.** La conformité à cette section fait partie de la porte 2
 de revue, sur l'axe « conformité aux conventions ». Un écart de palette, une
