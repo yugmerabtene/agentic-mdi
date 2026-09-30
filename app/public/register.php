@@ -47,6 +47,13 @@ $message_erreur = static function (string $champ) use ($erreurs): string {
     );
 };
 
+/**
+ * Le document est rendu dans un tampon : la feuille de style et les deux
+ * scripts sont insérés ensuite, par substitution sur le document complet, sans
+ * que les fonctions d'en-tête et de pied de page aient à changer.
+ */
+ob_start();
+
 UserController::entete_page('Inscription', '/register');
 
 if ($succes !== null) {
@@ -116,3 +123,22 @@ echo strtr($balisage, [
 ]);
 
 UserController::pied_de_page();
+
+/**
+ * Insère la feuille de style dans l'en-tête et les deux scripts avant la
+ * fermeture du corps, sur le document rendu en entier.
+ */
+$document = str_replace(
+    '</head>',
+    "<link rel=\"stylesheet\" href=\"/assets/style.css\">\n</head>",
+    ob_get_clean()
+);
+
+$document = str_replace(
+    '</body>',
+    "<script src=\"/assets/validation.js\" defer></script>\n"
+    . "<script src=\"/assets/app.js\" defer></script>\n</body>",
+    $document
+);
+
+print $document;

@@ -22,7 +22,7 @@ DirectoryIndex index.php
     # Adresse sans extension vers le fichier PHP de même nom.
     #
     # La règle ne vise qu’un nom simple, sans séparateur de répertoire : les
-    # ressources /css/style.css et /js/app.js existent sur le disque, la
+    # ressources /assets/style.css et /assets/app.js existent sur le disque, la
     # première condition les écarte, et la seconde refuse toute tentative de
     # transformer un sous-répertoire en fichier PHP.
     RewriteCond %{REQUEST_FILENAME} !-f
