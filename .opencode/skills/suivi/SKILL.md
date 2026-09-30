@@ -32,6 +32,13 @@ a_faire → en_cours → en_revue → validee
 - **Jamais le développeur sur sa propre tâche.** Il produit la preuve, pas la
   validation.
 
+## Les identifiants ne portent pas d'accent
+
+Les statuts (`a_faire`, `en_cours`, `en_revue`, `validee`, `rejetee`,
+`bloquee`, `annulee`) et les valeurs du champ `evenement` du journal sont des
+identifiants de machine : ils s'écrivent sans accent, comme les clés du JSON.
+Le texte destiné au lecteur, lui, s'écrit avec ses accents.
+
 ## Les règles de mise à jour
 
 1. Une tâche porte **trois à sept critères d'acceptation**, des dates, et son

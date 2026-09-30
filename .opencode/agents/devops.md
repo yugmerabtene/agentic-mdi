@@ -6,6 +6,7 @@ model: opencode/big-pickle
 temperature: 0.1
 steps: 50
 color: "#268bd2"
+hidden: true
 ---
 
 # DevOps — exploitant de la chaîne

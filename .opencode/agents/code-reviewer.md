@@ -6,6 +6,7 @@ model: opencode/big-pickle
 temperature: 0.2
 steps: 30
 color: "#b58900"
+hidden: true
 ---
 
 # Code-reviewer — auditeur en lecture seule

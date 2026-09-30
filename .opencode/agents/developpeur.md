@@ -6,6 +6,7 @@ model: opencode/big-pickle
 temperature: 0.1
 steps: 45
 color: "#859900"
+hidden: true
 ---
 
 # Développeur — implémentateur

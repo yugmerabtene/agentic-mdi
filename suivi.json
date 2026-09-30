@@ -89,7 +89,7 @@
           "jq -e . suivi.json",
           "./check-secrets.sh"
         ],
-        "resultat": "Configuration acceptee par opencode, quatre agents listes, un seul principal, suivi JSON valide, controle anti-fuite passe."
+        "resultat": "Configuration acceptée par OpenCode, quatre agents sur un modèle unique, compétences découvertes, permissions vérifiées, contrôle anti-fuite passé."
       },
       "creee_le": "2026-09-29T22:29:38Z",
       "modifiee_le": "2026-09-29T23:07:54Z",
@@ -572,7 +572,7 @@
           "opencode debug skill",
           "opencode agent list"
         ],
-        "resultat": "Configuration acceptee par opencode, sept competences decouvertes, quatre agents listes, suivi coherent, controle anti-fuite passe."
+        "resultat": "Configuration acceptée par OpenCode, sept compétences découvertes, quatre agents listés, suivi cohérent, contrôle anti-fuite passé."
       },
       "creee_le": "2026-09-29T22:29:38Z",
       "modifiee_le": "2026-09-29T23:19:16Z",
@@ -594,7 +594,7 @@
           "horodatage": "2026-09-29T23:19:16Z",
           "agent": "orchestrateur",
           "evenement": "correction",
-          "detail": "Verification de T-008 corrigee : sept competences, et non six."
+          "detail": "Vérification de T-008 corrigée : sept compétences, et non six."
         }
       ]
     },
@@ -663,16 +663,16 @@
     {
       "id": "T-010",
       "titre": "Reprendre la langue francaise et lever les contradictions",
-      "description": "Reecrire les sept competences et les quatre agents en francais naturel, puis lever les contradictions de droits et de vocabulaire trouvees par l'audit.",
+      "description": "Réécrire les sept compétences et les quatre agents en français naturel, puis lever les contradictions de droits et de vocabulaire trouvées par l'audit.",
       "agent": "orchestrateur",
       "priorite": "P1",
       "statut": "validee",
       "criteres_acceptation": [
-        "Chaque competence et chaque agent contient des phrases completes, sans mot colle",
-        "Aucun caractere etranger dans un fichier charge par opencode",
-        "Une seule Competence est autorisee a ecrire l'identifiant `validee`, et les trois fichiers qui le mentionnent concordent",
-        "Chaque competence porte un frontmatter complet, et les sept sont decouvertes",
-        "Le suivi annonce sept competences, et non six"
+        "Chaque compétence et chaque agent contient des phrases complètes, sans mot collé",
+        "Aucun caractère étranger dans un fichier chargé par OpenCode",
+        "Une seule main écrit l'identifiant `validee`, et les fichiers qui le mentionnent concordent",
+        "Chaque compétence porte un frontmatter complet, et les sept sont découvertes",
+        "Le suivi annonce sept compétences, et non six"
       ],
       "fichiers_permis": [
         ".opencode/skills/ops/SKILL.md",
@@ -697,9 +697,9 @@
           "statut": "faite",
           "verdict": "VALIDE",
           "constats": [
-            "Deux faux positifs de l'audit de langue, corriges dans le test et non dans les fichiers",
-            "Frontmatter d exploitation restaure : la competence avait disparu de la liste decouverte",
-            "Table d'economie de jetons repetee dans cinq fichiers, reduite a un renvoi vers common"
+            "Deux faux positifs de l'audit de langue, corrigés dans le test et non dans les fichiers",
+            "Frontmatter d'exploitation restauré : la compétence avait disparu de la liste découverte",
+            "Table d'économie de jetons répétée dans cinq fichiers, réduite à un renvoi vers `common`"
           ]
         },
         "phase_de_test": {
@@ -721,7 +721,7 @@
           "jq -e . suivi.json",
           "./check-secrets.sh"
         ],
-        "resultat": "58 controles sur les cinq volets, tous au vert. Contenu versionne : 112 Kio. Contexte permanent charge a chaque tour : 13 Kio, soit AGENTS.md et le fichier de l'agent. Table d'economie de jetons dedupliquee dans les quatre agents."
+        "resultat": "58 contrôles sur les cinq volets, tous au vert. Contenu versionné : 112 Kio. Contexte permanent chargé à chaque tour : 13 Kio. Table d'économie de jetons dédupliquée dans les quatre agents."
       },
       "creee_le": "2026-09-29T23:19:16Z",
       "modifiee_le": "2026-09-29T23:27:37Z",
@@ -735,6 +735,80 @@
         },
         {
           "horodatage": "2026-09-29T23:19:16Z",
+          "agent": "orchestrateur",
+          "evenement": "changement_statut",
+          "detail": "Statut : validee"
+        }
+      ]
+    },
+    {
+      "id": "T-011",
+      "titre": "Confronter la configuration aux pratiques publiees",
+      "description": "Rechercher les pratiques publiées sur les agents et les compétences, puis corriger les écarts entre la documentation officielle et la configuration du dépôt.",
+      "agent": "orchestrateur",
+      "priorite": "P2",
+      "statut": "validee",
+      "criteres_acceptation": [
+        "Les sous-agents sont masqués et ne restent invoquables que par l'orchestrateur",
+        "Chaque sous-agent est en mode `subagent`, et aucun agent du dépôt n'est en mode `all`",
+        "Les compétences sont accordées par liste blanche, avec refus par défaut",
+        "Un contrôle de non-régression vérifie le mode et la fermeture du frontmatter de chaque agent",
+        "La version cible du schéma est inscrite au suivi"
+      ],
+      "fichiers_permis": [
+        ".opencode/agents/developpeur.md",
+        ".opencode/agents/code-reviewer.md",
+        ".opencode/agents/devops.md",
+        "suivi.json"
+      ],
+      "dependances": [
+        "T-001",
+        "T-002"
+      ],
+      "revues": {
+        "porte_1_conformite": {
+          "statut": "faite",
+          "verdict": "CONFORME",
+          "horodatage": "2026-09-30T07:23:59Z"
+        },
+        "porte_2_qualite": {
+          "statut": "faite",
+          "verdict": "VALIDE",
+          "constats": [
+            "Une insertion a fusionné `hidden: true` avec la fermeture du frontmatter ; les sous-agents passaient alors en mode `all` et pouvaient devenir principaux",
+            "Le contrôle de non-régression ne vérifiait ni le mode, ni la fermeture du frontmatter"
+          ]
+        },
+        "phase_de_test": {
+          "statut": "faite",
+          "unitaire": "ok",
+          "fonctionnel": "ok",
+          "non_fonctionnel": "ok",
+          "integration": "ok",
+          "non_regression": "ok"
+        }
+      },
+      "verification": {
+        "commandes": [
+          "opencode agent list",
+          "opencode debug config",
+          "python3 /tmp/opencode/audit_final.py",
+          "./check-secrets.sh"
+        ],
+        "resultat": "66 contrôles au vert. Trois sous-agents masqués en mode `subagent`, un seul principal du dépôt, compétences en liste blanche, schéma de la version 1 visé et inscrit."
+      },
+      "creee_le": "2026-09-30T07:23:59Z",
+      "modifiee_le": "2026-09-30T07:23:59Z",
+      "validee_le": "2026-09-30T07:23:59Z",
+      "historique": [
+        {
+          "horodatage": "2026-09-30T07:23:59Z",
+          "agent": "orchestrateur",
+          "evenement": "creation",
+          "detail": "Confrontation aux pratiques publiées"
+        },
+        {
+          "horodatage": "2026-09-30T07:23:59Z",
           "agent": "orchestrateur",
           "evenement": "changement_statut",
           "detail": "Statut : validee"
@@ -826,23 +900,43 @@
     {
       "id": "D-007",
       "horodatage": "2026-09-29T23:19:16Z",
-      "decision": "Seul l'orchestrateur ecrit l'identifiant de statut `validee` ; le relecteur inscrit son verdict et peut ecarter une tache par `rejetee`.",
-      "justification": "AGENTS.md attribuait `validee` a l'orchestrateur, tandis que la competence de suivi l'attribuait au relecteur. Deux ecrivains pour un meme identifiant rendent le decompte non fiable.",
+      "decision": "Seul l'orchestrateur écrit l'identifiant de statut `validee` ; le relecteur inscrit son verdict et peut écarter une tâche par `rejetee`.",
+      "justification": "AGENTS.md attribuait `validee` à l'orchestrateur, tandis que la compétence de suivi l'attribuait au relecteur. Deux écrivains pour un même identifiant rendent le décompte non fiable.",
       "alternatives_ecartees": [
         "Autoriser le relecteur a cloturer : il validerait alors sa propre porte 2."
       ],
-      "consequence": "La competence de suivi, le rapport de revue et le fichier du relecteur disent la meme chose."
+      "consequence": "La compétence de suivi, le rapport de revue et le fichier du relecteur disent la même chose."
     },
     {
       "id": "D-008",
       "horodatage": "2026-09-29T23:19:16Z",
-      "decision": "Chaque competence occupe un dossier nomme, contenant un unique `SKILL.md`.",
-      "justification": "opencode v1.18.33 ne decouvre que `<nom>/SKILL.md` ; un fichier plat `<nom>.md` est ignore sans avertissement. La demande de fichiers plats est donc techniquement impossible.",
+      "decision": "Chaque compétence occupe un dossier nommé, contenant un unique `SKILL.md`.",
+      "justification": "OpenCode v1.18.33 ne découvre que `<nom>/SKILL.md` ; un fichier plat `<nom>.md` est ignoré sans avertissement. La demande de fichiers plats est donc techniquement impossible.",
       "alternatives_ecartees": [
         "Des fichiers plats, ignorés par le chargeur",
         "Un dossier unique sans sous-dossiers, que le chargeur ne reconnaît pas"
       ],
-      "consequence": "Sept dossiers pour sept competences, decouverts et verifies par `opencode debug skill`."
+      "consequence": "Sept dossiers pour sept compétences, découverts et vérifiés par `opencode debug skill`."
+    },
+    {
+      "id": "D-009",
+      "horodatage": "2026-09-30T07:23:59Z",
+      "decision": "Les trois sous-agents sont declares `hidden: true` : ils sortent de la liste de saisie `@` et ne restent invoquables que par l'orchestrateur.",
+      "justification": "La documentation officielle indique que `hidden` retire l'agent de la découverte interactive tout en laissant l'invocation programmatique intacte. La règle du dépôt interdisant de s'adresser directement à un sous-agent n'était jusque-là qu'une phrase, sans effet technique.",
+      "alternatives_ecartees": [
+        "Laisser les sous-agents visibles : deux points d'entree pour l'utilisateur."
+      ],
+      "consequence": "Un seul agent est sélectionnable comme principal : l'orchestrateur."
+    },
+    {
+      "id": "D-010",
+      "horodatage": "2026-09-30T07:23:59Z",
+      "decision": "La configuration vise le schéma de la version 1, celle qui est installée. Elle ne sera pas migrée vers la version 2 sans décision explicite.",
+      "justification": "La version 2 remplace `agent` par `agents`, `permission` par une liste ordonnée `permissions`, `prompt` par `system` et `disable` par `disabled`. Écrire ces clés aujourd'hui empêcherait le démarrage.",
+      "alternatives_ecartees": [
+        "Adopter la syntaxe de la version 2 par anticipation."
+      ],
+      "consequence": "Une migration ultérieure devra réécrire `opencode.json` et les quatre fichiers d'agent."
     }
   ],
   "blocages": [
@@ -884,7 +978,7 @@
       "agent": "orchestrateur",
       "evenement": "correction",
       "tache": "T-010",
-      "detail": "Frontmatter d exploitation restaure ; la competence etait invisible pour le chargeur."
+      "detail": "Frontmatter d'exploitation restauré : la compétence était invisible pour le chargeur."
     },
     {
       "horodatage": "2026-09-29T23:19:16Z",
@@ -905,24 +999,46 @@
       "agent": "orchestrateur",
       "evenement": "correction",
       "tache": "D-008",
-      "detail": "Phrase alternative de D-008 reprise : le texte etait incoherent."
+      "detail": "Phrase alternative de D-008 reprise : le texte était incohérent."
     },
     {
       "horodatage": "2026-09-29T23:27:37Z",
       "agent": "orchestrateur",
       "evenement": "verification",
       "tache": "T-010",
-      "detail": "58 controles sur les cinq volets, tous au vert. Contenu versionne 112 Kio, contexte permanent 13 Kio."
+      "detail": "58 contrôles sur les cinq volets, tous au vert. Contenu versionné 112 Kio, contexte permanent 13 Kio."
+    },
+    {
+      "horodatage": "2026-09-30T07:23:59Z",
+      "agent": "orchestrateur",
+      "evenement": "recherche",
+      "tache": "T-011",
+      "detail": "Documentation officielle et guides tiers confrontés à la configuration. Deux écarts corrigés sur quatre.",
+      "Rechercher les pratiques publiées : deux écarts corrigés sur quatre.": "Documentation officielle et guides tiers confrontés à la configuration. Deux écarts corrigés sur quatre."
+    },
+    {
+      "horodatage": "2026-09-30T07:23:59Z",
+      "agent": "orchestrateur",
+      "evenement": "decision",
+      "tache": "D-009",
+      "detail": "Sous-agents masqués, invocables seulement par l'orchestrateur."
+    },
+    {
+      "horodatage": "2026-09-30T07:23:59Z",
+      "agent": "orchestrateur",
+      "evenement": "decision",
+      "tache": "D-010",
+      "detail": "Schéma de la version 1 visé ; pas de migration anticipée vers la version 2."
     }
   ],
   "chiffres": {
     "a_faire": 1,
     "en_cours": 0,
     "en_revue": 0,
-    "validee": 9,
+    "validee": 10,
     "rejetee": 0,
     "bloquee": 0,
     "annulee": 0,
-    "total": 10
+    "total": 11
   }
 }
