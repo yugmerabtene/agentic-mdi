@@ -1,0 +1,71 @@
+# Socle conteneur du laboratoire de gestion des utilisateurs.
+# Deux services : l'application web Apache/PHP et la base MySQL.
+# Aucun secret n'est écrit ici : toutes les valeurs sensibles viennent
+# de l'environnement, donc du fichier .env local, jamais versionné.
+
+name: agentic-mdi
+
+services:
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    image: agentic-mdi/app:0.1
+    container_name: agentic-mdi-app
+    # Code applicatif monté en direct : une page modifiée est visible sans
+    # reconstruire l'image. La racine web reste /var/www/html/public.
+    volumes:
+      - ./app:/var/www/html
+    ports:
+      - "${APP_PORT:-8080}:80"
+    environment:
+      # Connexion à la base, transmise par l'environnement uniquement.
+      # Aucune de ces valeurs n'est codée en dur dans un fichier PHP.
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: ${DB_NAME:-gestion_users}
+      DB_USER: ${MYSQL_USER:?MYSQL_USER manquant dans .env}
+      DB_PASS: ${MYSQL_PASSWORD:?MYSQL_PASSWORD manquant dans .env}
+    # L'application attend que le serveur MySQL réponde et que la base existe.
+    # Elle ne dépend pas d'une table : le schéma relève du script
+    # d'initialisation et de la vérification, pas du démarrage du conteneur.
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: agentic-mdi-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD manquant dans .env}
+      MYSQL_DATABASE: ${DB_NAME:-gestion_users}
+      MYSQL_USER: ${MYSQL_USER:?MYSQL_USER manquant dans .env}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?MYSQL_PASSWORD manquant dans .env}
+    volumes:
+      # Volume nommé : les données survivent à un arrêt puis à un redémarrage.
+      - db_data:/var/lib/mysql
+      # Schéma monté en lecture seule. Le répertoire d'initialisation n'est
+      # lu qu'au premier démarrage d'un volume vide.
+      - ./app/sql/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    ports:
+      - "${DB_PUBLISHED_PORT:-3307}:3306"
+    # Sonde de disponibilité réelle : elle vérifie que le serveur MySQL répond
+    # et que la base attendue existe. Elle n'exige aucune table particulière.
+    # Le répertoire d'initialisation n'est lu que sur un volume vide : exiger
+    # SELECT 1 FROM users condamnerait un volume existant dont la table
+    # manquerait à ne jamais devenir sain, et le service app n'y démarrerait
+    # jamais, sans message. Le schéma reste vérifié par scripts/verifier.sh.
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mysqladmin ping -h 127.0.0.1 -u root -p"$$MYSQL_ROOT_PASSWORD" --silent >/dev/null 2>&1 && mysql -h 127.0.0.1 -u root -p"$$MYSQL_ROOT_PASSWORD" -e "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '$$MYSQL_DATABASE'" >/dev/null 2>&1
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+    restart: unless-stopped
+
+volumes:
+  db_data:
+    name: agentic-mdi-db-data

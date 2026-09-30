@@ -1,0 +1,26 @@
+# Fichier d'exclusion du contexte de construction de l'image de l'application.
+# Le contexte de construction est le répertoire app/ : sans ce fichier, tout
+# ce répertoire serait transmis au démon Docker, y compris le fichier
+# d'environnement local et le schéma.
+
+# Secret d'environnement local, jamais dans une image
+.env
+.env.*
+!.env.example
+
+# Clés et certificats
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+.netrc
+.npmrc
+.pypirc
+credentials*
+secrets*
+
+# Fichiers de construction eux-mêmes, sans objet dans l'image
+Dockerfile
+.dockerignore

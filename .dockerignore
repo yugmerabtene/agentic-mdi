@@ -1,0 +1,38 @@
+# Fichier d'exclusion du contexte de construction.
+# Il ne s'applique qu'à une construction dont le contexte est la racine du
+# dépôt. Le contexte retenu par docker-compose.yml étant le répertoire app/,
+# c'est app/.dockerignore qui filtre cette construction-là ; celui-ci reste
+# utile pour une construction depuis la racine et sert de garde-fou.
+
+# Outillage du système agentique, jamais nécessaire à l'image
+.git/
+.gitignore
+.opencode/
+AGENTS.md
+CONTEXT.md
+CDC/
+README.md
+suivi.json
+opencode.json
+check-secrets.sh
+.opencode/tools/
+
+# Secrets et environnement local, jamais dans une image
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+.netrc
+.npmrc
+.pypirc
+credentials*
+secrets*
+
+# Fichiers de l'outillage de construction lui-même
+Dockerfile
+.dockerignore
