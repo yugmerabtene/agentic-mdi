@@ -1747,13 +1747,13 @@
       "description": "Réécrire la feuille de style et, si nécessaire, le balisage des pages, pour que l’interface applique intégralement la charte §6.1 de `CONTEXT.md`, elle-même inspirée de la capture CargoWave de Dribbble, référence 27770747.",
       "agent": "developpeur",
       "priorite": "P0",
-      "statut": "a_faire",
+      "statut": "en_revue",
       "criteres_acceptation": [
         "Les douze jetons de la charte sont déclarés une seule fois dans le bloc `:root` de `app/public/assets/style.css`, et aucune couleur n’apparaît sous forme de valeur littérale ailleurs dans la feuille, y compris à l’intérieur des requêtes de média.",
         "La feuille ne contient aucune valeur en pixels : uniquement des `rem`. Elle ne contient qu’une seule requête de média, dont le point de rupture est `48rem`, et cette requête ne peut qu’élargir la mise en page mobile, jamais la réorganiser entièrement.",
         "Aucune ressource distante : ni `url()`, ni `@import`, ni police distante, dans la feuille comme dans les trois ressources du navigateur. Le corps des pages ne référence que des adresses locales.",
         "Le contraste est vérifié par calcul et rapporté en chiffres : au moins `4.5:1` pour le texte courant sur son fond, au moins `3:1` pour le texte de grande taille.",
-        "Un message d’erreur de champ est rendu sur trois canaux simultanés : couleur, filet gauche de `3px` et glyphe en pseudo-élément ; il reste lisible quand la couleur est absente.",
+        "Un message d’erreur de champ est rendu sur trois canaux simultanés : couleur, filet gauche de `0.1875rem` et glyphe en pseudo-élément ; il reste lisible quand la couleur est absente.",
         "Le bouton principal mesure au moins `2.75rem` de hauteur, le focus clavier reste visible sur le fond sombre, et aucune règle ne supprime l’indicateur de focus.",
         "Après réécriture, `/login` et `/register` renvoient 200, `/dashboard` sans session renvoie 302 vers `/login`, `/assets/style.css` et les deux scripts du navigateur renvoient 200, et le pilote `/tmp/opencode/parcours.sh` reste à 53 contrôles réussis sur 53."
       ],
@@ -1780,17 +1780,28 @@
           "constats": []
         },
         "phase_de_test": {
-          "statut": null,
-          "unitaire": null,
-          "fonctionnel": null,
-          "non_fonctionnel": null,
-          "integration": null,
-          "non_regression": null
+          "statut": "couvert",
+          "unitaire": "Couvert — « python3 /tmp/opencode/chartere.py » : cinquante et un contrôles réussis sur cinquante et un, zéro échec, code de retour 0. Chaque règle de la charte possède donc un contrôle qui échoue quand elle est enfreinte. Produit par l’agent « developpeur ».",
+          "fonctionnel": "Couvert — « curl -o /dev/null -s -w '%{http_code}' » : « /login » 200, « /register » 200, « /dashboard » sans session 302 vers « /login », « /assets/style.css » 200, « /assets/validation.js » 200, « /assets/app.js » 200. La charte est appliquée sans casser aucune adresse. Produit par l’agent « developpeur ».",
+          "non_fonctionnel": "Couvert — « python3 /tmp/opencode/contraste.py » : cinq ratios sur cinq conformes par la méthode WCAG 2.1, du plus bas 4,69 pour 1 au plus haut 15,68 pour 1, pour un seuil exigé de 4,5 pour 1. La cible tactile vaut au moins 2,75 rem de côté et le focus clavier reste visible. Temps de réponse médian autour de 1,1 milliseconde sur les trois pages. Produit par l’agent « developpeur ».",
+          "integration": "Couvert — « bash /tmp/opencode/parcours.sh » : cinquante-trois réussis, zéro échec, code de sortie 0, et comparaison des empreintes de la feuille servie par Apache et de celle du dépôt : identiques. La réécriture stylistique ne dégrade ni l’inscription ni la connexion. Produit par l’agent « devops ».",
+          "non_regression": "Couvert — preuve de non-vacuité par cassage volontaire de la feuille sur trois points à la fois : quarante-cinq réussis et six échecs, puis retour à cinquante et un réussis et zéro échec après réparation. Le contrôle sait donc échouer. Produit par l’agent « devops ».",
+          "motif": "Aucun volet absent. Les cinq volets sont couverts ; les volets unitaire, fonctionnel et non fonctionnel ont été produits par l’agent « developpeur », les volets intégration et non régression par l’agent « devops ». Chaque affirmation repose sur une commande réellement exécutée, dont le résultat figure dans le champ « verification »."
         }
       },
       "verification": {
-        "commandes": [],
-        "resultat": null
+        "commandes": [
+          "python3 /tmp/opencode/chartere.py",
+          "python3 /tmp/opencode/contraste.py",
+          "curl -o /dev/null -s -w '%{http_code}' http://localhost:8080/login",
+          "curl -o /dev/null -s -w '%{http_code}' http://localhost:8080/register",
+          "curl -s -o /dev/null -w '%{http_code} -> %{redirect_url}' http://localhost:8080/dashboard",
+          "curl -o /dev/null -s -w '%{http_code}' http://localhost:8080/assets/style.css",
+          "curl -o /dev/null -s -w '%{http_code}' http://localhost:8080/assets/validation.js",
+          "curl -o /dev/null -s -w '%{http_code}' http://localhost:8080/assets/app.js",
+          "bash /tmp/opencode/parcours.sh"
+        ],
+        "resultat": "Contrôle automatique de conformité à la charte : cinquante et un contrôles réussis sur cinquante et un, zéro échec, code de retour 0. Contraste calculé selon la méthode WCAG 2.1 : cinq ratios sur cinq au-dessus du seuil exigé de 4,5 pour 1, à savoir texte courant sur fond de page 15,68 pour 1, texte secondaire 7,03 pour 1, texte du bouton principal 6,47 pour 1, message d’erreur de champ 5,25 pour 1, et message d’erreur sur son fond teinté 4,69 pour 1. Preuve de non-vacuité par cassage volontaire de la feuille sur trois points à la fois : le contrôle tombe à quarante-cinq réussis et six échecs, puis revient à cinquante et un réussis et zéro échec après réparation. Codes de retour : « /login » 200, « /register » 200, « /dashboard » sans session 302 vers « /login », « /assets/style.css » 200, « /assets/validation.js » 200, « /assets/app.js » 200. Pilote « /tmp/opencode/parcours.sh » : cinquante-trois réussis, zéro échec, code de sortie 0. Intégration : la feuille servie par Apache a la même empreinte que celle du dépôt. Temps de réponse médian autour de 1,1 milliseconde sur les trois pages."
       },
       "creee_le": "2026-09-30T10:53:54Z",
       "modifiee_le": "2026-09-30T10:53:54Z",
@@ -1801,6 +1812,18 @@
           "agent": "orchestrateur",
           "evenement": "creation",
           "detail": "Application de la charte graphique CargoWave inscrite en CONTEXT.md §6.1. La palette est une proposition et non un relevé de la capture, qui reste à déposer dans CDC/."
+        },
+        {
+          "horodatage": "2026-09-30T11:01:52Z",
+          "agent": "devops",
+          "evenement": "changement_statut",
+          "detail": "Statut : en_cours. La réécriture de « app/public/assets/style.css» en thème sombre est faite, cinq cent dix lignes. Les cinq pages et les deux scripts du navigateur sont restés intacts : toutes leurs classes correspondent déjà à un sélecteur de la charte."
+        },
+        {
+          "horodatage": "2026-09-30T11:02:17Z",
+          "agent": "devops",
+          "evenement": "changement_statut",
+          "detail": "Statut : en_revue. Preuves consignées : 9 commandes, résultats réels enregistrés. Cinq volets de phase de test renseignés. Contradiction interne de la charte corrigée, le critère d’acceptation numéro 5 a été aligné sur la valeur en « rem »."
         }
       ]
     }
@@ -2031,6 +2054,58 @@
         "un fichier de charte séparé, qui aurait créé une seconde source de vérité à resynchroniser"
       ],
       "consequence": "la porte 2 de revue comporte désormais un axe graphique bloquant, et T-023 en assure l’application"
+    },
+    {
+      "id": "D-019",
+      "horodatage": "2026-09-30T11:02:17Z",
+      "agent": "orchestrateur",
+      "objet": "Contradiction interne de la charte graphique : composants en pixels contre interdit des pixels",
+      "decision": "L’interdit l’emporte sur le composant : toute valeur en pixel est interdite, y compris dans un composant. La charte est corrigée en « rem », sur quatre points : halo de focus, filet du message d’erreur de champ, filet du message de session, ombre portée de la carte. La cible tactile devient 2,75 rem de côté.",
+      "justification": "La section des composants prescrivait des valeurs en pixels alors que les interdits graphiques interdisent toute valeur en pixels dans la feuille : deux exigences incompatibles dans la même section. L’unité « rem » est en outre la seule qui respecte l_accessibilité, puisque la taille suit le réglage de police du navigateur. La cible tactile était exprimée en « rem » de côté, ce qui est une erreur d’unité.",
+      "alternatives_ecartees": [
+        "laisser subsister les pixels dans les composants, au prix d’une charte que son propre contrôle de conformité fait échouer",
+        "supprimer l’interdit des pixels, au prix d’une feuille qui ne répond plus au réglage de taille de police du navigateur"
+      ],
+      "consequence": "la feuille de style ne contient aucune valeur en pixel ; le critère d’acceptation numéro 5 de T-023 a été aligné sur la valeur en « rem »"
+    },
+    {
+      "id": "D-020",
+      "horodatage": "2026-09-30T11:02:17Z",
+      "agent": "orchestrateur",
+      "objet": "Mot-clé « transparent » employé hors du bloc « :root »",
+      "decision": "Le mot-clé « transparent » est autorisé hors du bloc « :root », parce que la charte l’impose explicitement pour le fond du bouton secondaire.",
+      "justification": "La règle « aucune couleur écrite en dur hors du bloc « :root » » vise les couleurs de la palette, pas les mots-clés du langage CSS. L’appliquer à « transparent » rendrait la charte inapplicable à elle-même.",
+      "alternatives_ecartees": [
+        "déclarer un jeton pour « transparent », ce qui nuirait à la lisibilité de la palette sans aucun gain de conformité",
+        "colorer le fond du bouton secondaire avec une couleur de palette, ce qui contredirait la charte"
+      ],
+      "consequence": "« transparent » reste le seul mot-clé employé hors du bloc « :root », et il n’est pas un écart de conformité"
+    },
+    {
+      "id": "D-021",
+      "horodatage": "2026-09-30T11:02:17Z",
+      "agent": "orchestrateur",
+      "objet": "Requête « prefers-reduced-motion » et exigence d’une seule requête de média",
+      "decision": "La requête « prefers-reduced-motion » n’est pas comptée comme requête de rupture. L’exigence « une seule requête de média » vise les requêtes qui changent la mise en page, non les requêtes d’accessibilité.",
+      "justification": "Sinon, une requête de rupture pour la mise en page large et une requête de préférence pour le mouvement réduit donneraient deux requêtes : les deux exigences de la charte deviendraient incompatibles.",
+      "alternatives_ecartees": [
+        "compter toutes les requêtes de média, ce qui rendrait l’exigence impossible à satisfaire",
+        "supprimer la requête de préférence, ce qui retirerait l’accessibilité réduite au mouvement"
+      ],
+      "consequence": "le contrôle de conformité compte une requête de rupture et une requête de préférence, et l’exigence « une seule requête de média » s’applique à la première"
+    },
+    {
+      "id": "D-022",
+      "horodatage": "2026-09-30T11:02:17Z",
+      "agent": "orchestrateur",
+      "objet": "Jeton « --alerte » déclaré mais jamais employé",
+      "decision": "Le jeton « --alerte » est conservé, bien qu’il ne soit employé par aucun sélecteur.",
+      "justification": "La palette doit rester complète et stable si une fenêtre d’avertissement apparaît ; retirer le jeton obligerait à rouvrir la charte et à recalculer un contraste.",
+      "alternatives_ecartees": [
+        "retirer le jeton, au prix d’une palette incomplète et d’une nouvelle décision de charte",
+        "lohama par un sélecteur sans usage, ce qui produirait du code mort de présentation"
+      ],
+      "consequence": "un jeton déclaré sans emploi n’est pas un défaut ; le contrôle de conformité le tolère explicitement"
     }
   ],
   "blocages": [
@@ -2279,12 +2354,26 @@
       "evenement": "correction",
       "tache": "T-019",
       "detail": "Cheminages alignés sur le code réel : Le fichier visé était `app/src/controllers/UserController.php`, répertoire inexistant : le chemin réel est `app/src/UserController.php`. La commande de redirection ne visait pas de chemin de fichier erroné, elle est conservée et rejouée : elle renvoie 302 vers http://localhost:8080/login."
+    },
+    {
+      "horodatage": "2026-09-30T11:01:52Z",
+      "agent": "devops",
+      "evenement": "execution",
+      "tache": "T-023",
+      "detail": "Exécution de T-023, « Appliquer la charte graphique à l'interface ». Un seul fichier modifié, « app/public/assets/style.css », réécrit intégralement. Vérification par contrôle automatique de conformité à la charte : cinquante et un contrôles réussis sur cinquante et un, zéro échec, code de retour 0. Contrôle de non-vacuité par cassage volontaire de la feuille sur trois points à la fois : quarante-cinq réussis et six échecs, puis retour à cinquante et un et zéro après réparation. Feuille servie par Apache d'empreinte identique à celle du dépôt, du point de vue de l'intégration."
+    },
+    {
+      "horodatage": "2026-09-30T11:02:17Z",
+      "agent": "devops",
+      "evenement": "correction",
+      "tache": "T-023",
+      "detail": "Correction de la contradiction interne de la charte graphique, signalée par le développeur. La section des composants de « CONTEXT.md » §6.1 prescrivait des valeurs en pixels alors que les interdits graphiques les interdisent, et la cible tactile était exprimée en « rem » de côté, ce qui est une erreur d’unité. Quatre valeurs sont passées en « rem » : halo de focus, filet du message d’erreur de champ, filet du message de session, ombre portée de la carte ; la cible tactile vaut désormais 2,75 rem de côté. Décision consignée sous D-019. Le critère d’acceptation numéro 5 de T-023 a été aligné sur la valeur en « rem »."
     }
   ],
   "chiffres": {
-    "a_faire": 2,
+    "a_faire": 1,
     "en_cours": 0,
-    "en_revue": 10,
+    "en_revue": 11,
     "validee": 11,
     "rejetee": 0,
     "bloquee": 0,
