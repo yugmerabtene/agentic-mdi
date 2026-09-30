@@ -1712,6 +1712,69 @@
           "detail": "« scripts/creer-compte-demo.sh » rattache a « fichiers_permis », ce qui supprime le defaut de tracabilite : le fichier livre ne dependait d'aucune tache."
         }
       ]
+    },
+    {
+      "id": "T-023",
+      "titre": "Appliquer la charte graphique à l’interface",
+      "description": "Réécrire la feuille de style et, si nécessaire, le balisage des pages, pour que l’interface applique intégralement la charte §6.1 de `CONTEXT.md`, elle-même inspirée de la capture CargoWave de Dribbble, référence 27770747.",
+      "agent": "developpeur",
+      "priorite": "P0",
+      "statut": "a_faire",
+      "criteres_acceptation": [
+        "Les douze jetons de la charte sont déclarés une seule fois dans le bloc `:root` de `app/public/assets/style.css`, et aucune couleur n’apparaît sous forme de valeur littérale ailleurs dans la feuille, y compris à l’intérieur des requêtes de média.",
+        "La feuille ne contient aucune valeur en pixels : uniquement des `rem`. Elle ne contient qu’une seule requête de média, dont le point de rupture est `48rem`, et cette requête ne peut qu’élargir la mise en page mobile, jamais la réorganiser entièrement.",
+        "Aucune ressource distante : ni `url()`, ni `@import`, ni police distante, dans la feuille comme dans les trois ressources du navigateur. Le corps des pages ne référence que des adresses locales.",
+        "Le contraste est vérifié par calcul et rapporté en chiffres : au moins `4.5:1` pour le texte courant sur son fond, au moins `3:1` pour le texte de grande taille.",
+        "Un message d’erreur de champ est rendu sur trois canaux simultanés : couleur, filet gauche de `3px` et glyphe en pseudo-élément ; il reste lisible quand la couleur est absente.",
+        "Le bouton principal mesure au moins `2.75rem` de hauteur, le focus clavier reste visible sur le fond sombre, et aucune règle ne supprime l’indicateur de focus.",
+        "Après réécriture, `/login` et `/register` renvoient 200, `/dashboard` sans session renvoie 302 vers `/login`, `/assets/style.css` et les deux scripts du navigateur renvoient 200, et le pilote `/tmp/opencode/parcours.sh` reste à 53 contrôles réussis sur 53."
+      ],
+      "fichiers_permis": [
+        "app/public/assets/style.css",
+        "app/public/index.php",
+        "app/public/login.php",
+        "app/public/logout.php",
+        "app/public/dashboard.php",
+        "app/public/register.php"
+      ],
+      "dependances": [
+        "T-021"
+      ],
+      "revues": {
+        "porte_1_conformite": {
+          "statut": null,
+          "verdict": null,
+          "horodatage": null
+        },
+        "porte_2_qualite": {
+          "statut": null,
+          "verdict": null,
+          "constats": []
+        },
+        "phase_de_test": {
+          "statut": null,
+          "unitaire": null,
+          "fonctionnel": null,
+          "non_fonctionnel": null,
+          "integration": null,
+          "non_regression": null
+        }
+      },
+      "verification": {
+        "commandes": [],
+        "resultat": null
+      },
+      "creee_le": "2026-09-30T10:53:54Z",
+      "modifiee_le": "2026-09-30T10:53:54Z",
+      "validee_le": null,
+      "historique": [
+        {
+          "horodatage": "2026-09-30T10:53:54Z",
+          "agent": "orchestrateur",
+          "evenement": "creation",
+          "detail": "Application de la charte graphique CargoWave inscrite en CONTEXT.md §6.1. La palette est une proposition et non un relevé de la capture, qui reste à déposer dans CDC/."
+        }
+      ]
     }
   ],
   "decisions": [
@@ -1927,6 +1990,19 @@
         "Placer l’amorceur dans `public/`, ce qui l’exposerait au téléchargement"
       ],
       "consequence": "Un fichier s’ajoute à l’arborescence du cahier des charges, et le chargement du code tient en un point unique."
+    },
+    {
+      "id": "D-018",
+      "horodatage": "2026-09-30T10:53:54Z",
+      "agent": "orchestrateur",
+      "objet": "Charte graphique de l’interface",
+      "decision": "La charte graphique de l’interface est inscrite dans `CONTEXT.md` §6.1, et devient normative pour toute tâche d’interface.",
+      "justification": "le sous-agent de développement charge `CONTEXT.md` comme instruction, la charte est donc visible par lui sans fichier supplémentaire",
+      "alternatives_ecartees": [
+        "une compétence dédiée, qui aurait élargi le contexte de l’agent et que la règle des compétences étroites interdit",
+        "un fichier de charte séparé, qui aurait créé une seconde source de vérité à resynchroniser"
+      ],
+      "consequence": "la porte 2 de revue comporte désormais un axe graphique bloquant, et T-023 en assure l’application"
     }
   ],
   "blocages": [
@@ -2133,16 +2209,23 @@
       "evenement": "verification",
       "tache": "T-012 a T-021",
       "detail": "Suivi mis a jour par programme : statuts des dix taches portees a « en_revue », preuves reelles consignees, cinq volets de phase de test renseignes avec la commande qui prouve chacun, faux motif de blocage retire de T-014, « scripts/creer-compte-demo.sh » rattache a T-022, cheminement de T-021 corrige, chiffres recalcules a partir des statuts reels. Aucun statut « validee » n'a ete ecrit : ce statut appartient a l'orchestrateur."
+    },
+    {
+      "horodatage": "2026-09-30T10:53:54Z",
+      "agent": "orchestrateur",
+      "evenement": "cadrage",
+      "tache": "T-023",
+      "detail": "Charte graphique de l’interface inscrite en CONTEXT.md §6.1 : douze jetons de couleur sur `:root`, échelle typographique en `rem`, sept intentions hiérarchisées, interdits graphiques et seuils de contraste chiffrés. Jalon J11 ouvert et ligne de risque ajoutée : la capture CargoWave de Dribbble, référence 27770747, n’est pas lisible depuis cet environnement, la palette est donc une proposition et non un relevé. T-023 créée et rattachée à T-021."
     }
   ],
   "chiffres": {
-    "a_faire": 1,
+    "a_faire": 2,
     "en_cours": 0,
     "en_revue": 10,
     "validee": 11,
     "rejetee": 0,
     "bloquee": 0,
     "annulee": 0,
-    "total": 22
+    "total": 23
   }
 }
