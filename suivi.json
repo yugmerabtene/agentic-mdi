@@ -1,0 +1,928 @@
+{
+  "schema_version": 1,
+  "projet": {
+    "nom": "agentic-mdi",
+    "finalite": "Système agentique opencode : un orchestrateur transforme un cahier des charges en contexte de travail, découpe en tâches, délègue à trois sous-agents, et tient un suivi horodaté.",
+    "cahier_des_charges": {
+      "dossier": "CDC/",
+      "fichiers": [],
+      "horodatage_source": null,
+      "etat": "Seul un gabarit est déposé, pas de cahier des charges réel."
+    },
+    "contexte_travail": {
+      "fichier": "CONTEXT.md",
+      "horodatage": "2026-09-29T22:29:38Z",
+      "etat": "gabarit initial"
+    }
+  },
+  "statut_global": "cadrage",
+  "statuts_possibles": [
+    "cadrage",
+    "en_cours",
+    "en_revue",
+    "en_attente",
+    "termine",
+    "bloque"
+  ],
+  "statuts_tache_possibles": [
+    "a_faire",
+    "en_cours",
+    "en_revue",
+    "validee",
+    "rejetee",
+    "bloquee",
+    "annulee"
+  ],
+  "volets_phase_de_test": [
+    "unitaire",
+    "fonctionnel",
+    "non_fonctionnel",
+    "integration",
+    "non_regression"
+  ],
+  "taches": [
+    {
+      "id": "T-001",
+      "titre": "Configurer les quatre agents sur un modèle unique",
+      "description": "Déclarer l'orchestrateur comme agent primaire par défaut, désactiver les agents intégrés, déclarer les trois sous-agents, poser les permissions par motif et la troncature des sorties d'outils.",
+      "agent": "orchestrateur",
+      "priorite": "P0",
+      "statut": "validee",
+      "criteres_acceptation": [
+        "default_agent vaut orchestrateur, et build et plan sont désactivés",
+        "Les quatre agents déclarent le modèle opencode/big-pickle",
+        "permission.task refuse par défaut puis autorise les trois sous-agents nommément",
+        "code-reviewer n'a de droit d'écriture que sur suivi.json",
+        "Les permissions sont portées par opencode.json, pas par les fichiers d'agent",
+        "Le fichier est du JSON strict, lisible par jq"
+      ],
+      "fichiers_permis": [
+        "opencode.json",
+        ".opencode/agents/"
+      ],
+      "dependances": [],
+      "revues": {
+        "porte_1_conformite": {
+          "statut": "faite",
+          "verdict": "CONFORME",
+          "horodatage": "2026-09-29T22:29:38Z"
+        },
+        "porte_2_qualite": {
+          "statut": "faite",
+          "verdict": "VALIDE",
+          "constats": []
+        },
+        "phase_de_test": {
+          "statut": "faite",
+          "unitaire": "ok",
+          "fonctionnel": "ok",
+          "non_fonctionnel": "ok",
+          "integration": "ok",
+          "non_regression": "ok"
+        }
+      },
+      "verification": {
+        "commandes": [
+          "jq -e . opencode.json",
+          "opencode debug config",
+          "opencode agent list",
+          "jq -e . suivi.json",
+          "./check-secrets.sh"
+        ],
+        "resultat": "Configuration acceptee par opencode, quatre agents listes, un seul principal, suivi JSON valide, controle anti-fuite passe."
+      },
+      "creee_le": "2026-09-29T22:29:38Z",
+      "modifiee_le": "2026-09-29T23:07:54Z",
+      "validee_le": "2026-09-29T22:29:38Z",
+      "historique": [
+        {
+          "horodatage": "2026-09-29T22:29:38Z",
+          "agent": "orchestrateur",
+          "evenement": "creation",
+          "detail": "Configurer les quatre agents sur un modèle unique"
+        },
+        {
+          "horodatage": "2026-09-29T22:29:38Z",
+          "agent": "orchestrateur",
+          "evenement": "changement_statut",
+          "detail": "Statut : validee"
+        },
+        {
+          "horodatage": "2026-09-29T23:07:54Z",
+          "agent": "orchestrateur",
+          "evenement": "changement_statut",
+          "detail": "Commentaires retirés de opencode.json : JSON strict, vérifiable par jq."
+        }
+      ]
+    },
+    {
+      "id": "T-002",
+      "titre": "Regrouper les compétences par rôle, avec une compétence commune",
+      "description": "Sept compétences au lieu de dix : une par rôle, plus une compétence commune qui porte les règles partagées.",
+      "agent": "orchestrateur",
+      "priorite": "P1",
+      "statut": "validee",
+      "criteres_acceptation": [
+        "Chaque compétence porte un nom et une description valides dans son frontmatter",
+        "Le nom déclaré est identique au nom du dossier, sans quoi opencode ne la découvre pas",
+        "Chaque agent ne voit que les compétences qui lui sont attribuées, et `common` est accordée à tous",
+        "Aucune règle commune n'est dupliquée : elle n'existe que dans `common`",
+        "Chaque compétence est actionnable, sans renvoi obligatoire à un autre fichier"
+      ],
+      "fichiers_permis": [
+        ".opencode/skills/"
+      ],
+      "dependances": [
+        "T-001"
+      ],
+      "revues": {
+        "porte_1_conformite": {
+          "statut": "faite",
+          "verdict": "CONFORME",
+          "horodatage": "2026-09-29T22:29:38Z"
+        },
+        "porte_2_qualite": {
+          "statut": "faite",
+          "verdict": "VALIDE",
+          "constats": []
+        },
+        "phase_de_test": {
+          "statut": "faite",
+          "unitaire": "ok",
+          "fonctionnel": "ok",
+          "non_fonctionnel": "ok",
+          "integration": "ok",
+          "non_regression": "ok"
+        }
+      },
+      "verification": {
+        "commandes": [
+          "opencode debug skill",
+          "opencode debug config",
+          "jq -e . suivi.json",
+          "./check-secrets.sh"
+        ],
+        "resultat": "Sept compétences découvertes par opencode, dont `common` accordée aux quatre agents ; aucune règle commune dupliquée."
+      },
+      "creee_le": "2026-09-29T22:29:38Z",
+      "modifiee_le": "2026-09-29T23:04:24Z",
+      "validee_le": "2026-09-29T22:29:38Z",
+      "historique": [
+        {
+          "horodatage": "2026-09-29T22:29:38Z",
+          "agent": "orchestrateur",
+          "evenement": "creation",
+          "detail": "Regrouper les compétences par rôle"
+        },
+        {
+          "horodatage": "2026-09-29T22:29:38Z",
+          "agent": "orchestrateur",
+          "evenement": "changement_statut",
+          "detail": "Statut : validee"
+        },
+        {
+          "horodatage": "2026-09-29T23:04:24Z",
+          "agent": "orchestrateur",
+          "evenement": "changement_statut",
+          "detail": "Compétence `common` ajoutée et accordée aux quatre agents ; contenu des compétences condensé."
+        }
+      ]
+    },
+    {
+      "id": "T-003",
+      "titre": "Initialiser le suivi horodaté",
+      "description": "Créer suivi.json selon la compétence suivi, avec les tâches du socle, les décisions et le journal.",
+      "agent": "orchestrateur",
+      "priorite": "P0",
+      "statut": "validee",
+      "criteres_acceptation": [
+        "Le JSON est valide",
+        "Chaque tâche porte des critères d'acceptation, des dates et un historique",
+        "Le décompte correspond exactement au décompte des statuts des tâches",
+        "Tous les horodatages sont au format ISO 8601 en temps universel"
+      ],
+      "fichiers_permis": [
+        "suivi.json",
+        ".opencode/skills/suivi/SKILL.md"
+      ],
+      "dependances": [
+        "T-001"
+      ],
+      "revues": {
+        "porte_1_conformite": {
+          "statut": "faite",
+          "verdict": "CONFORME",
+          "horodatage": "2026-09-29T22:29:38Z"
+        },
+        "porte_2_qualite": {
+          "statut": "faite",
+          "verdict": "VALIDE",
+          "constats": []
+        },
+        "phase_de_test": {
+          "statut": "faite",
+          "unitaire": "ok",
+          "fonctionnel": "ok",
+          "non_fonctionnel": "ok",
+          "integration": "ok",
+          "non_regression": "ok"
+        }
+      },
+      "verification": {
+        "commandes": [
+          "jq -e . opencode.json",
+          "jq -e . suivi.json",
+          "./check-secrets.sh"
+        ],
+        "resultat": "Configuration valide, six compétences, suivi cohérent, contrôle anti-fuite passé."
+      },
+      "creee_le": "2026-09-29T22:29:38Z",
+      "modifiee_le": "2026-09-29T22:29:38Z",
+      "validee_le": "2026-09-29T22:29:38Z",
+      "historique": [
+        {
+          "horodatage": "2026-09-29T22:29:38Z",
+          "agent": "orchestrateur",
+          "evenement": "creation",
+          "detail": "Initialiser le suivi horodaté"
+        },
+        {
+          "horodatage": "2026-09-29T22:29:38Z",
+          "agent": "orchestrateur",
+          "evenement": "changement_statut",
+          "detail": "Statut : validee"
+        }
+      ]
+    },
+    {
+      "id": "T-004",
+      "titre": "Poser la phase de test à cinq volets",
+      "description": "Écrire la compétence tests et la rendre obligatoire avant toute validation, pour le développeur comme pour le relecteur.",
+      "agent": "orchestrateur",
+      "priorite": "P0",
+      "statut": "validee",
+      "criteres_acceptation": [
+        "Les cinq volets sont nommés et ordonnés dans la compétence",
+        "Chaque volet porte un seuil de passage mesurable",
+        "Un volet absent sans motif consigné est déclaré non conforme",
+        "La règle est reprise dans AGENTS.md et dans le rapport imposé au développeur"
+      ],
+      "fichiers_permis": [
+        ".opencode/skills/tests/SKILL.md",
+        ".opencode/agents/developpeur.md",
+        ".opencode/agents/code-reviewer.md"
+      ],
+      "dependances": [
+        "T-001"
+      ],
+      "revues": {
+        "porte_1_conformite": {
+          "statut": "faite",
+          "verdict": "CONFORME",
+          "horodatage": "2026-09-29T22:29:38Z"
+        },
+        "porte_2_qualite": {
+          "statut": "faite",
+          "verdict": "VALIDE",
+          "constats": []
+        },
+        "phase_de_test": {
+          "statut": "faite",
+          "unitaire": "ok",
+          "fonctionnel": "ok",
+          "non_fonctionnel": "ok",
+          "integration": "ok",
+          "non_regression": "ok"
+        }
+      },
+      "verification": {
+        "commandes": [
+          "jq -e . opencode.json",
+          "jq -e . suivi.json",
+          "./check-secrets.sh"
+        ],
+        "resultat": "Configuration valide, six compétences, suivi cohérent, contrôle anti-fuite passé."
+      },
+      "creee_le": "2026-09-29T22:29:38Z",
+      "modifiee_le": "2026-09-29T22:29:38Z",
+      "validee_le": "2026-09-29T22:29:38Z",
+      "historique": [
+        {
+          "horodatage": "2026-09-29T22:29:38Z",
+          "agent": "orchestrateur",
+          "evenement": "creation",
+          "detail": "Poser la phase de test à cinq volets"
+        },
+        {
+          "horodatage": "2026-09-29T22:29:38Z",
+          "agent": "orchestrateur",
+          "evenement": "changement_statut",
+          "detail": "Statut : validee"
+        }
+      ]
+    },
+    {
+      "id": "T-005",
+      "titre": "Écrire le gabarit de contexte de travail",
+      "description": "Produire CONTEXT.md depuis le gabarit de la compétence cadrage, en attendant le cahier des charges réel.",
+      "agent": "orchestrateur",
+      "priorite": "P0",
+      "statut": "validee",
+      "criteres_acceptation": [
+        "Les dix sections du gabarit sont présentes",
+        "Les zones d'ombre sont recensées avec une urgence",
+        "Chaque choix technique non imposé est motivé et doué d'une alternative écartée",
+        "La traçabilité relie chaque exigence à une tâche"
+      ],
+      "fichiers_permis": [
+        "CONTEXT.md",
+        ".opencode/skills/cadrage/SKILL.md"
+      ],
+      "dependances": [
+        "T-001"
+      ],
+      "revues": {
+        "porte_1_conformite": {
+          "statut": "faite",
+          "verdict": "CONFORME",
+          "horodatage": "2026-09-29T22:29:38Z"
+        },
+        "porte_2_qualite": {
+          "statut": "faite",
+          "verdict": "VALIDE",
+          "constats": []
+        },
+        "phase_de_test": {
+          "statut": "faite",
+          "unitaire": "ok",
+          "fonctionnel": "ok",
+          "non_fonctionnel": "ok",
+          "integration": "ok",
+          "non_regression": "ok"
+        }
+      },
+      "verification": {
+        "commandes": [
+          "jq -e . opencode.json",
+          "jq -e . suivi.json",
+          "./check-secrets.sh"
+        ],
+        "resultat": "Configuration valide, six compétences, suivi cohérent, contrôle anti-fuite passé."
+      },
+      "creee_le": "2026-09-29T22:29:38Z",
+      "modifiee_le": "2026-09-29T22:29:38Z",
+      "validee_le": "2026-09-29T22:29:38Z",
+      "historique": [
+        {
+          "horodatage": "2026-09-29T22:29:38Z",
+          "agent": "orchestrateur",
+          "evenement": "creation",
+          "detail": "Écrire le gabarit de contexte de travail"
+        },
+        {
+          "horodatage": "2026-09-29T22:29:38Z",
+          "agent": "orchestrateur",
+          "evenement": "changement_statut",
+          "detail": "Statut : validee"
+        }
+      ]
+    },
+    {
+      "id": "T-006",
+      "titre": "Confier la gestion des secrets au devops",
+      "description": "Écrire la section de gestion des secrets dans la compétence ops, et en faire la frontière explicite du sous-agent devops.",
+      "agent": "devops",
+      "priorite": "P0",
+      "statut": "validee",
+      "criteres_acceptation": [
+        "La compétence décrit l'inventaire, l'injection, l'exclusion et les trois barrières",
+        "Le devops est désigné comme seul agent habilité à tenir la frontière des secrets",
+        "La rotation prime sur la réécriture d'historique",
+        "Aucune valeur de secret n'est lue ni reproduite, dans les livrables comme dans les rapports"
+      ],
+      "fichiers_permis": [
+        ".opencode/skills/ops/SKILL.md",
+        ".opencode/agents/devops.md"
+      ],
+      "dependances": [
+        "T-001"
+      ],
+      "revues": {
+        "porte_1_conformite": {
+          "statut": "faite",
+          "verdict": "CONFORME",
+          "horodatage": "2026-09-29T22:29:38Z"
+        },
+        "porte_2_qualite": {
+          "statut": "faite",
+          "verdict": "VALIDE",
+          "constats": []
+        },
+        "phase_de_test": {
+          "statut": "faite",
+          "unitaire": "ok",
+          "fonctionnel": "ok",
+          "non_fonctionnel": "ok",
+          "integration": "ok",
+          "non_regression": "ok"
+        }
+      },
+      "verification": {
+        "commandes": [
+          "jq -e . opencode.json",
+          "jq -e . suivi.json",
+          "./check-secrets.sh"
+        ],
+        "resultat": "Configuration valide, six compétences, suivi cohérent, contrôle anti-fuite passé."
+      },
+      "creee_le": "2026-09-29T22:29:38Z",
+      "modifiee_le": "2026-09-29T22:29:38Z",
+      "validee_le": "2026-09-29T22:29:38Z",
+      "historique": [
+        {
+          "horodatage": "2026-09-29T22:29:38Z",
+          "agent": "orchestrateur",
+          "evenement": "creation",
+          "detail": "Confier la gestion des secrets au devops"
+        },
+        {
+          "horodatage": "2026-09-29T22:29:38Z",
+          "agent": "orchestrateur",
+          "evenement": "changement_statut",
+          "detail": "Statut : validee"
+        }
+      ]
+    },
+    {
+      "id": "T-007",
+      "titre": "Optimiser la consommation de jetons sans perdre en justesse",
+      "description": "Poser la troncature des sorties d'outils, la compression avec élagage, la profondeur de délégation, et la section d'économie dans AGENTS.md.",
+      "agent": "orchestrateur",
+      "priorite": "P1",
+      "statut": "validee",
+      "criteres_acceptation": [
+        "tool_output limite la longueur des sorties d'outils, la sortie complète restant consultable sur disque",
+        "compaction.prune est actif et la fenêtre de conservation est réduite",
+        "subagent_depth vaut 1, ce qui interdit toute délégation en cascade",
+        "AGENTS.md énonce les sept interdits d'économie de jetons",
+        "Aucune règle de justesse n'est affaiblie par ces réglages"
+      ],
+      "fichiers_permis": [
+        "opencode.json",
+        "AGENTS.md"
+      ],
+      "dependances": [
+        "T-001"
+      ],
+      "revues": {
+        "porte_1_conformite": {
+          "statut": "faite",
+          "verdict": "CONFORME",
+          "horodatage": "2026-09-29T22:29:38Z"
+        },
+        "porte_2_qualite": {
+          "statut": "faite",
+          "verdict": "VALIDE",
+          "constats": []
+        },
+        "phase_de_test": {
+          "statut": "faite",
+          "unitaire": "ok",
+          "fonctionnel": "ok",
+          "non_fonctionnel": "ok",
+          "integration": "ok",
+          "non_regression": "ok"
+        }
+      },
+      "verification": {
+        "commandes": [
+          "jq -e . opencode.json",
+          "jq -e . suivi.json",
+          "./check-secrets.sh"
+        ],
+        "resultat": "Configuration valide, six compétences, suivi cohérent, contrôle anti-fuite passé."
+      },
+      "creee_le": "2026-09-29T22:29:38Z",
+      "modifiee_le": "2026-09-29T22:29:38Z",
+      "validee_le": "2026-09-29T22:29:38Z",
+      "historique": [
+        {
+          "horodatage": "2026-09-29T22:29:38Z",
+          "agent": "orchestrateur",
+          "evenement": "creation",
+          "detail": "Optimiser la consommation de jetons sans perdre en justesse"
+        },
+        {
+          "horodatage": "2026-09-29T22:29:38Z",
+          "agent": "orchestrateur",
+          "evenement": "changement_statut",
+          "detail": "Statut : validee"
+        }
+      ]
+    },
+    {
+      "id": "T-008",
+      "titre": "Aplatir l'arborescence et poser le garde-fou",
+      "description": "Ramener sept fichiers à la racine, supprimer les dossiers de documentation, de contexte par agent et de commandes, et poser le contrôle anti-fuite.",
+      "agent": "devops",
+      "priorite": "P1",
+      "statut": "validee",
+      "criteres_acceptation": [
+        "Sept fichiers à la racine, hors .opencode/",
+        "Aucun dossier de documentation, de contexte par agent, ni de commande",
+        "check-secrets.sh renvoie 0 sur un dépôt propre et 1 sur un secret détecté",
+        "Le script n'affiche jamais la valeur d'un secret, seulement fichier et numéro de ligne",
+        "Le fichier d'exclusion protège les secrets locaux et les dépendances"
+      ],
+      "fichiers_permis": [
+        "check-secrets.sh",
+        ".gitignore",
+        "AGENTS.md",
+        "README.md"
+      ],
+      "dependances": [
+        "T-001"
+      ],
+      "revues": {
+        "porte_1_conformite": {
+          "statut": "faite",
+          "verdict": "CONFORME",
+          "horodatage": "2026-09-29T22:29:38Z"
+        },
+        "porte_2_qualite": {
+          "statut": "faite",
+          "verdict": "VALIDE",
+          "constats": []
+        },
+        "phase_de_test": {
+          "statut": "faite",
+          "unitaire": "ok",
+          "fonctionnel": "ok",
+          "non_fonctionnel": "ok",
+          "integration": "ok",
+          "non_regression": "ok"
+        }
+      },
+      "verification": {
+        "commandes": [
+          "jq -e . opencode.json",
+          "jq -e . suivi.json",
+          "./check-secrets.sh",
+          "opencode debug config",
+          "opencode debug skill",
+          "opencode agent list"
+        ],
+        "resultat": "Configuration acceptee par opencode, sept competences decouvertes, quatre agents listes, suivi coherent, controle anti-fuite passe."
+      },
+      "creee_le": "2026-09-29T22:29:38Z",
+      "modifiee_le": "2026-09-29T23:19:16Z",
+      "validee_le": "2026-09-29T22:29:38Z",
+      "historique": [
+        {
+          "horodatage": "2026-09-29T22:29:38Z",
+          "agent": "orchestrateur",
+          "evenement": "creation",
+          "detail": "Aplatir l'arborescence et poser le garde-fou"
+        },
+        {
+          "horodatage": "2026-09-29T22:29:38Z",
+          "agent": "orchestrateur",
+          "evenement": "changement_statut",
+          "detail": "Statut : validee"
+        },
+        {
+          "horodatage": "2026-09-29T23:19:16Z",
+          "agent": "orchestrateur",
+          "evenement": "correction",
+          "detail": "Verification de T-008 corrigee : sept competences, et non six."
+        }
+      ]
+    },
+    {
+      "id": "T-009",
+      "titre": "Produire le contexte de travail réel",
+      "description": "Remplacer le gabarit CONTEXT.md par le contexte réel dès que le cahier des charges est déposé dans CDC/.",
+      "agent": "orchestrateur",
+      "priorite": "P0",
+      "statut": "a_faire",
+      "criteres_acceptation": [
+        "Les dix sections du gabarit sont remplies à partir des fichiers de CDC/",
+        "Chaque fichier de CDC/ a été lu en entier",
+        "Les zones d'ombre bloquantes sont remontées à l'utilisateur",
+        "La section traçabilité relie chaque exigence du cahier des charges à une tâche"
+      ],
+      "fichiers_permis": [
+        "CONTEXT.md",
+        "suivi.json"
+      ],
+      "dependances": [
+        "T-005"
+      ],
+      "revues": {
+        "porte_1_conformite": {
+          "statut": null,
+          "verdict": null,
+          "horodatage": null
+        },
+        "porte_2_qualite": {
+          "statut": null,
+          "verdict": null,
+          "constats": []
+        },
+        "phase_de_test": {
+          "statut": null,
+          "unitaire": null,
+          "fonctionnel": null,
+          "non_fonctionnel": null,
+          "integration": null,
+          "non_regression": null
+        }
+      },
+      "verification": {
+        "commandes": [],
+        "resultat": null
+      },
+      "creee_le": "2026-09-29T22:29:38Z",
+      "modifiee_le": "2026-09-29T22:29:38Z",
+      "validee_le": null,
+      "historique": [
+        {
+          "horodatage": "2026-09-29T22:29:38Z",
+          "agent": "orchestrateur",
+          "evenement": "creation",
+          "detail": "Produire le contexte de travail réel"
+        },
+        {
+          "horodatage": "2026-09-29T22:29:38Z",
+          "agent": "orchestrateur",
+          "evenement": "changement_statut",
+          "detail": "Statut : a_faire"
+        }
+      ]
+    },
+    {
+      "id": "T-010",
+      "titre": "Reprendre la langue francaise et lever les contradictions",
+      "description": "Reecrire les sept competences et les quatre agents en francais naturel, puis lever les contradictions de droits et de vocabulaire trouvees par l'audit.",
+      "agent": "orchestrateur",
+      "priorite": "P1",
+      "statut": "validee",
+      "criteres_acceptation": [
+        "Chaque competence et chaque agent contient des phrases completes, sans mot colle",
+        "Aucun caractere etranger dans un fichier charge par opencode",
+        "Une seule Competence est autorisee a ecrire l'identifiant `validee`, et les trois fichiers qui le mentionnent concordent",
+        "Chaque competence porte un frontmatter complet, et les sept sont decouvertes",
+        "Le suivi annonce sept competences, et non six"
+      ],
+      "fichiers_permis": [
+        ".opencode/skills/ops/SKILL.md",
+        ".opencode/skills/suivi/SKILL.md",
+        ".opencode/skills/revue/SKILL.md",
+        ".opencode/agents/code-reviewer.md",
+        "CONTEXT.md",
+        "suivi.json"
+      ],
+      "dependances": [
+        "T-002",
+        "T-004",
+        "T-008"
+      ],
+      "revues": {
+        "porte_1_conformite": {
+          "statut": "faite",
+          "verdict": "CONFORME",
+          "horodatage": "2026-09-29T23:19:16Z"
+        },
+        "porte_2_qualite": {
+          "statut": "faite",
+          "verdict": "VALIDE",
+          "constats": [
+            "Deux faux positifs de l'audit de langue, corriges dans le test et non dans les fichiers",
+            "Frontmatter d exploitation restaure : la competence avait disparu de la liste decouverte",
+            "Table d'economie de jetons repetee dans cinq fichiers, reduite a un renvoi vers common"
+          ]
+        },
+        "phase_de_test": {
+          "statut": "faite",
+          "unitaire": "ok",
+          "fonctionnel": "ok",
+          "non_fonctionnel": "ok",
+          "integration": "ok",
+          "non_regression": "ok"
+        }
+      },
+      "verification": {
+        "commandes": [
+          "python3 /tmp/opencode/audit_final.py",
+          "opencode debug skill",
+          "opencode debug config",
+          "opencode agent list",
+          "jq -e . opencode.json",
+          "jq -e . suivi.json",
+          "./check-secrets.sh"
+        ],
+        "resultat": "58 controles sur les cinq volets, tous au vert. Contenu versionne : 112 Kio. Contexte permanent charge a chaque tour : 13 Kio, soit AGENTS.md et le fichier de l'agent. Table d'economie de jetons dedupliquee dans les quatre agents."
+      },
+      "creee_le": "2026-09-29T23:19:16Z",
+      "modifiee_le": "2026-09-29T23:27:37Z",
+      "validee_le": "2026-09-29T23:19:16Z",
+      "historique": [
+        {
+          "horodatage": "2026-09-29T23:19:16Z",
+          "agent": "orchestrateur",
+          "evenement": "creation",
+          "detail": "Reprise de la langue francaise"
+        },
+        {
+          "horodatage": "2026-09-29T23:19:16Z",
+          "agent": "orchestrateur",
+          "evenement": "changement_statut",
+          "detail": "Statut : validee"
+        }
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D-001",
+      "horodatage": "2026-09-29T22:29:38Z",
+      "agent": "orchestrateur",
+      "objet": "Arborescence du système",
+      "decision": "Sept fichiers à la racine, avec un seul dossier .opencode contenant agents et compétences. Aucun dossier de documentation, de contexte par agent, ni de commande.",
+      "justification": "La convention déjà en usage dans les projets existants du poste est la plate : règles, contexte, suivi et configuration à la racine, agents dans .opencode/agents, compétences dans .opencode/skills, aucune commande.",
+      "alternatives_ecartees": [
+        "Un dossier par type de document",
+        "Des fichiers de commande",
+        "Un fichier de contexte par agent"
+      ],
+      "consequence": "Moins de navigation, moins de fichiers, et une convention unique déjà comprise."
+    },
+    {
+      "id": "D-002",
+      "horodatage": "2026-09-29T22:29:38Z",
+      "agent": "orchestrateur",
+      "objet": "Modèle des agents",
+      "decision": "Un modèle unique, opencode/big-pickle, pour l'orchestrateur et les trois sous-agents, sans variante.",
+      "justification": "Demande explicite, et c'est déjà la valeur retenue dans l'ensemble des projets existants du poste.",
+      "alternatives_ecartees": [
+        "Un modèle par spécialisation",
+        "Des variantes de niveau de raisonnement par agent"
+      ],
+      "consequence": "La qualité ne peut pas être isolée par agent : elle se règle globalement."
+    },
+    {
+      "id": "D-003",
+      "horodatage": "2026-09-29T22:29:38Z",
+      "agent": "orchestrateur",
+      "objet": "Permissions portées par la configuration",
+      "decision": "Toutes les permissions vivent dans opencode.json. Les fichiers d'agent ne portent que le comportement.",
+      "justification": "Une seule source de vérité, et aucun conflit possible entre les deux endroits.",
+      "alternatives_ecartees": [
+        "Permissions dans les fichiers d'agent",
+        "Permissions dupliquées dans les deux"
+      ],
+      "consequence": "Un agent ne peut pas s'octroyer un droit qu'il n'a pas dans la configuration."
+    },
+    {
+      "id": "D-004",
+      "horodatage": "2026-09-29T22:29:38Z",
+      "agent": "orchestrateur",
+      "objet": "Économie de jetons",
+      "decision": "Troncature des sorties d'outils à 80 lignes et 6 000 octets, élagage actif, fenêtre de conservation réduite, profondeur de délégation fixée à 1.",
+      "justification": "Le levier le plus rentable n'est pas la compression du prompt mais la taille des sorties d'outils, qui dominent la consommation. La sortie complète reste écrite sur disque, donc rien n'est perdu.",
+      "alternatives_ecartees": [
+        "Réduire le nombre d'agents",
+        "Compresser le prompt des agents",
+        "Ne désactiver que le partage de session"
+      ],
+      "consequence": "Diviser la consommation sans toucher aux règles de justesse, qui restent intégralement appliquées."
+    },
+    {
+      "id": "D-005",
+      "horodatage": "2026-09-29T22:29:38Z",
+      "agent": "orchestrateur",
+      "objet": "Droits d'écriture du relecteur",
+      "decision": "Le relecteur n'a de droit d'écriture que sur suivi.json.",
+      "justification": "Un agent qui vérifie son propre travail n'est pas un contrôle. Et un relecteur muet ne laisse aucune trace opposable de son constat.",
+      "alternatives_ecartees": [
+        "Aucune écriture pour le relecteur",
+        "Écriture libre à sa discrétion"
+      ],
+      "consequence": "La séparation des rôles tient dans la configuration, pas seulement dans la prose."
+    },
+    {
+      "id": "D-006",
+      "horodatage": "2026-09-29T23:07:54Z",
+      "agent": "orchestrateur",
+      "objet": "Format de opencode.json",
+      "decision": "JSON strict, sans aucun commentaire, vérifiable par jq au même titre que suivi.json.",
+      "justification": "La configuration doit rester contrôlable par un outil standard. Un commentaire dans le fichier rendait jq inexploitable et introduisait deux formes de lecture pour un même dépôt. Les explications vivent dans les compétences et dans ce fichier, là où elles sont versionnées avec leur objet.",
+      "alternatives_ecartees": [
+        "JSONC commenté, illisible par jq",
+        "Un fichier de documentation séparé pour la configuration"
+      ],
+      "consequence": "opencode.json se vérifie avec jq -e . et avec opencode debug config."
+    },
+    {
+      "id": "D-007",
+      "horodatage": "2026-09-29T23:19:16Z",
+      "decision": "Seul l'orchestrateur ecrit l'identifiant de statut `validee` ; le relecteur inscrit son verdict et peut ecarter une tache par `rejetee`.",
+      "justification": "AGENTS.md attribuait `validee` a l'orchestrateur, tandis que la competence de suivi l'attribuait au relecteur. Deux ecrivains pour un meme identifiant rendent le decompte non fiable.",
+      "alternatives_ecartees": [
+        "Autoriser le relecteur a cloturer : il validerait alors sa propre porte 2."
+      ],
+      "consequence": "La competence de suivi, le rapport de revue et le fichier du relecteur disent la meme chose."
+    },
+    {
+      "id": "D-008",
+      "horodatage": "2026-09-29T23:19:16Z",
+      "decision": "Chaque competence occupe un dossier nomme, contenant un unique `SKILL.md`.",
+      "justification": "opencode v1.18.33 ne decouvre que `<nom>/SKILL.md` ; un fichier plat `<nom>.md` est ignore sans avertissement. La demande de fichiers plats est donc techniquement impossible.",
+      "alternatives_ecartees": [
+        "Des fichiers plats, ignorés par le chargeur",
+        "Un dossier unique sans sous-dossiers, que le chargeur ne reconnaît pas"
+      ],
+      "consequence": "Sept dossiers pour sept competences, decouverts et verifies par `opencode debug skill`."
+    }
+  ],
+  "blocages": [
+    {
+      "id": "B-001",
+      "horodatage": "2026-09-29T22:29:38Z",
+      "agent": "orchestrateur",
+      "tache": "T-009",
+      "description": "Le dossier CDC/ ne contient qu'un gabarit, pas de cahier des charges réel.",
+      "impact": "CONTEXT.md reste un gabarit, et aucune tâche d'un projet réel ne peut être découpée.",
+      "action_attendue": "Déposer le cahier des charges dans CDC/, puis demander à l'orchestrateur de démarrer le projet.",
+      "statut": "ouvert"
+    }
+  ],
+  "journal": [
+    {
+      "horodatage": "2026-09-29T22:29:38Z",
+      "agent": "orchestrateur",
+      "evenement": "creation",
+      "tache": null,
+      "detail": "Système agentique initialisé et aplati : sept fichiers à la racine, quatre agents, six compétences. Huit tâches validées, une en attente du cahier des charges."
+    },
+    {
+      "horodatage": "2026-09-29T23:04:24Z",
+      "agent": "orchestrateur",
+      "evenement": "creation",
+      "tache": "T-002",
+      "detail": "Sept compétences au total : une par rôle, plus `common` pour les règles partagées."
+    },
+    {
+      "horodatage": "2026-09-29T23:07:54Z",
+      "agent": "orchestrateur",
+      "evenement": "creation",
+      "tache": "T-001",
+      "detail": "Tous les commentaires de opencode.json ont été retirés sur demande explicite."
+    },
+    {
+      "horodatage": "2026-09-29T23:19:16Z",
+      "agent": "orchestrateur",
+      "evenement": "correction",
+      "tache": "T-010",
+      "detail": "Frontmatter d exploitation restaure ; la competence etait invisible pour le chargeur."
+    },
+    {
+      "horodatage": "2026-09-29T23:19:16Z",
+      "agent": "orchestrateur",
+      "evenement": "decision",
+      "tache": "D-007",
+      "detail": "L'orchestrateur seul ecrit l'identifiant validee ; le relecteur peut ecarter par rejetee."
+    },
+    {
+      "horodatage": "2026-09-29T23:19:16Z",
+      "agent": "orchestrateur",
+      "evenement": "decision",
+      "tache": "D-008",
+      "detail": "Un dossier nomme par competence, impose par le chargeur de la version 1.18.33."
+    },
+    {
+      "horodatage": "2026-09-29T23:19:23Z",
+      "agent": "orchestrateur",
+      "evenement": "correction",
+      "tache": "D-008",
+      "detail": "Phrase alternative de D-008 reprise : le texte etait incoherent."
+    },
+    {
+      "horodatage": "2026-09-29T23:27:37Z",
+      "agent": "orchestrateur",
+      "evenement": "verification",
+      "tache": "T-010",
+      "detail": "58 controles sur les cinq volets, tous au vert. Contenu versionne 112 Kio, contexte permanent 13 Kio."
+    }
+  ],
+  "chiffres": {
+    "a_faire": 1,
+    "en_cours": 0,
+    "en_revue": 0,
+    "validee": 9,
+    "rejetee": 0,
+    "bloquee": 0,
+    "annulee": 0,
+    "total": 10
+  }
+}

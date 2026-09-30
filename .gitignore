@@ -1,0 +1,48 @@
+# Dépendances et artefacts de construction
+node_modules/
+.opencode/node_modules/
+dist/
+build/
+out/
+.next/
+target/
+vendor/
+
+# Environnement local
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Secrets et credentials — jamais versionnés, jamais lus
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+.netrc
+.npmrc
+.pypirc
+credentials*
+secrets*
+
+# Caches d'outils
+.cache/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+__pycache__/
+*.tsbuildinfo
+
+# Système et éditeurs
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Fichiers temporaires du suivi
+*.tmp
+*.bak
