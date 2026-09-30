@@ -28,7 +28,16 @@ MOTIFS=(
   'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}'
   '-----BEGIN [A-Z ]*PRIVATE KEY-----'
   'ssh-rsa AAAA[0-9A-Za-z+/]{50,}'
-  '(password|passwd|pwd|secret|token|api[_-]?key)[[:space:]]*[:=][[:space:]]*["'"'"']?[A-Za-z0-9!@#$%^&*_+\-]{12,}'
+  # Motif « mot clé + valeur ». Deux motifs se partagent la couverture, car un
+  # nom de variable en MAJUSCULES_SOUS_BARRE, tel GROQ_API_KEY affecté à une
+  # clé d'interface, est une référence saine à l'environnement et jamais une
+  # valeur : le traiter comme un secret bloquait le commit sans raison. Le
+  # premier motif exige une minuscule dans la valeur, le second une valeur
+  # entièrement en majuscules et sans tiret bas, forme d'une constante.
+  # Ensemble, ils couvrent toute valeur de onze caractères ou plus, à la
+  # seule exception de celle d'une référence en MAJUSCULES_SOUS_BARRE.
+  '(password|passwd|pwd|secret|token|api[_-]?key)[[:space:]]*[:=][[:space:]]*["'"'"']?[A-Za-z0-9!@#$%^&*_+\-]{0,}[a-z][A-Za-z0-9!@#$%^&*_+\-]{10,}'
+  '(password|passwd|pwd|secret|token|api[_-]?key)[[:space:]]*[:=][[:space:]]*["'"'"']?[A-Z0-9]{12,}'
 )
 
 # Connexions authentifiees vers une base de donnees.
