@@ -3,31 +3,186 @@
   "default_agent": "orchestrateur",
   "model": "opencode/big-pickle",
   "small_model": "opencode/big-pickle",
-  "instructions": [
-    "AGENTS.md",
-    "CONTEXT.md"
-  ],
-  "skills": {
-    "paths": [
-      ".opencode/skills"
-    ]
-  },
+  "logLevel": "WARN",
   "share": "disabled",
   "subagent_depth": 1,
-  "logLevel": "WARN",
-  "experimental": {
-    "batch_tool": true
-  },
+  "instructions": ["AGENTS.md", "CONTEXT.md"],
+  "skills": { "paths": [".opencode/skills"] },
+  "tool_output": { "max_bytes": 6000, "max_lines": 80 },
   "compaction": {
     "auto": true,
     "prune": true,
-    "tail_turns": 6,
     "preserve_recent_tokens": 6000,
-    "reserved": 6000
+    "reserved": 6000,
+    "tail_turns": 6
   },
-  "tool_output": {
-    "max_lines": 80,
-    "max_bytes": 6000
+  "experimental": { "batch_tool": true },
+  "agent": {
+    "build": { "disable": true },
+    "plan": { "disable": true },
+    "general": { "disable": true },
+    "explore": { "disable": true },
+    "orchestrateur": {
+      "permission": {
+        "edit": {
+          "*": "deny",
+          "CONTEXT.md": "allow",
+          "suivi.json": "allow",
+          "CDC/**": "allow"
+        },
+        "bash": {
+          "*": "deny",
+          "git status": "allow",
+          "git status *": "allow",
+          "git log": "allow",
+          "git log *": "allow",
+          "git diff": "allow",
+          "git diff *": "allow",
+          "git show": "allow",
+          "git show *": "allow",
+          "git add": "allow",
+          "git add *": "allow",
+          "git commit": "allow",
+          "git commit *": "allow",
+          "git push": "allow",
+          "git push *": "allow",
+          "git pull": "allow",
+          "git pull *": "allow",
+          "./check-secrets.sh": "allow",
+          "ls": "allow",
+          "ls *": "allow",
+          "rtk ls *": "allow",
+          "cat": "allow",
+          "cat *": "allow",
+          "wc": "allow",
+          "wc *": "allow",
+          "jq": "allow",
+          "jq *": "allow",
+          "date -u": "allow",
+          "date -u *": "allow",
+          "mkdir *": "allow",
+          "touch *": "allow",
+          "cp *": "allow",
+          "mv *": "allow",
+          "tee *": "allow",
+          "rm *": "allow",
+          "git push --force*": "deny",
+          "git push -f*": "deny",
+          "git reset --hard*": "deny",
+          "git rebase*": "deny",
+          "git filter-branch*": "deny",
+          "git clean -fd": "deny",
+          "git clean -fd *": "deny",
+          "git clean -fd*": "deny",
+          "git checkout .": "deny",
+          "git checkout -- .": "deny",
+          "git commit --amend*": "deny",
+          "git commit -a --amend*": "deny",
+          "rm -rf*": "deny",
+          "rm -fr*": "deny",
+          "sudo *": "deny",
+          "su *": "deny",
+          "chmod 777*": "deny"
+        },
+        "skill": {
+          "*": "deny",
+          "common": "allow",
+          "cadrage": "allow",
+          "tests": "allow",
+          "suivi": "allow"
+        },
+        "task": {
+          "*": "deny",
+          "developpeur": "allow",
+          "code-reviewer": "allow",
+          "devops": "allow"
+        },
+        "question": "deny"
+      }
+    },
+    "developpeur": {
+      "permission": {
+        "edit": "allow",
+        "task": "deny",
+        "question": "deny",
+        "bash": {
+          "*": "allow",
+          "git push --force*": "deny",
+          "git push -f*": "deny",
+          "git reset --hard*": "deny",
+          "git clean -fd": "deny",
+          "git clean -fd *": "deny",
+          "git checkout .": "deny",
+          "git checkout -- .": "deny",
+          "git rebase*": "deny",
+          "git filter-branch*": "deny",
+          "git commit --amend*": "deny",
+          "git commit -a --amend*": "deny",
+          "rm -rf*": "deny",
+          "rm -fr*": "deny",
+          "sudo *": "deny",
+          "su *": "deny",
+          "chmod 777*": "deny"
+        },
+        "skill": {
+          "*": "deny",
+          "common": "allow",
+          "developpement": "allow",
+          "tests": "allow",
+          "suivi": "allow"
+        }
+      }
+    },
+    "code-reviewer": {
+      "permission": {
+        "edit": { "*": "deny", "suivi.json": "allow" },
+        "bash": {
+          "*": "deny",
+          "git status": "allow",
+          "git status *": "allow",
+          "git log": "allow",
+          "git log *": "allow",
+          "git diff": "allow",
+          "git diff *": "allow",
+          "git show": "allow",
+          "git show *": "allow",
+          "ls": "allow",
+          "ls *": "allow",
+          "rtk ls *": "allow",
+          "cat": "allow",
+          "cat *": "allow",
+          "wc": "allow",
+          "wc *": "allow"
+        },
+        "skill": {
+          "*": "deny",
+          "common": "allow",
+          "revue": "allow",
+          "tests": "allow",
+          "suivi": "allow"
+        },
+        "task": "deny",
+        "question": "deny",
+        "todowrite": "deny"
+      }
+    },
+    "devops": {
+      "permission": {
+        "edit": "allow",
+        "task": "deny",
+        "question": "deny",
+        "bash": {
+          "*": "allow"
+        },
+        "skill": {
+          "*": "deny",
+          "common": "allow",
+          "ops": "allow",
+          "tests": "allow",
+          "suivi": "allow"
+        }
+      }
+    }
   },
   "permission": {
     "read": {
@@ -75,7 +230,8 @@
       "git push --force*": "deny",
       "git push -f*": "deny",
       "git reset --hard*": "deny",
-      "git clean*": "deny",
+      "git clean -fd": "deny",
+      "git clean -fd *": "deny",
       "git checkout .": "deny",
       "git checkout -- .": "deny",
       "git rebase*": "deny",
@@ -87,156 +243,6 @@
       "sudo *": "deny",
       "su *": "deny",
       "chmod 777*": "deny"
-    }
-  },
-  "agent": {
-    "build": {
-      "disable": true
-    },
-    "plan": {
-      "disable": true
-    },
-    "general": {
-      "disable": true
-    },
-    "explore": {
-      "disable": true
-    },
-    "orchestrateur": {
-      "permission": {
-        "edit": {
-          "*": "deny",
-          "CONTEXT.md": "allow",
-          "suivi.json": "allow",
-          "CDC/**": "allow"
-        },
-        "bash": {
-          "*": "deny",
-          "git status": "allow",
-          "git status *": "allow",
-          "git log *": "allow",
-          "git diff *": "allow",
-          "git show *": "allow",
-          "ls": "allow",
-          "ls *": "allow",
-          "rtk ls *": "allow",
-          "cat *": "allow",
-          "jq *": "allow",
-          "wc *": "allow",
-          "date -u *": "allow",
-          "./check-secrets.sh": "allow"
-        },
-        "skill": {
-          "*": "deny",
-          "common": "allow",
-          "cadrage": "allow",
-          "tests": "allow",
-          "suivi": "allow"
-        },
-        "task": {
-          "*": "deny",
-          "developpeur": "allow",
-          "code-reviewer": "allow",
-          "devops": "allow"
-        }
-      }
-    },
-    "developpeur": {
-      "permission": {
-        "task": "deny",
-        "question": "deny",
-        "edit": "allow",
-        "bash": {
-          "*": "allow",
-          "git push --force*": "deny",
-          "git push -f*": "deny",
-          "git reset --hard*": "deny",
-          "git clean*": "deny",
-          "git checkout .": "deny",
-          "git checkout -- .": "deny",
-          "git rebase*": "deny",
-          "git filter-branch*": "deny",
-          "git commit --amend*": "deny",
-          "git commit -a --amend*": "deny",
-          "rm -rf*": "deny",
-          "rm -fr*": "deny",
-          "sudo *": "deny",
-          "su *": "deny",
-          "chmod 777*": "deny"
-        },
-        "skill": {
-          "*": "deny",
-          "common": "allow",
-          "developpement": "allow",
-          "tests": "allow",
-          "suivi": "allow"
-        }
-      }
-    },
-    "code-reviewer": {
-      "permission": {
-        "task": "deny",
-        "question": "deny",
-        "edit": {
-          "*": "deny",
-          "suivi.json": "allow"
-        },
-        "todowrite": "deny",
-        "bash": {
-          "*": "deny",
-          "git status": "allow",
-          "git status *": "allow",
-          "git log *": "allow",
-          "git diff *": "allow",
-          "git show *": "allow",
-          "ls": "allow",
-          "ls *": "allow",
-          "rtk ls *": "allow",
-          "cat *": "allow",
-          "wc *": "allow"
-        },
-        "skill": {
-          "*": "deny",
-          "common": "allow",
-          "revue": "allow",
-          "tests": "allow",
-          "suivi": "allow"
-        }
-      }
-    },
-    "devops": {
-      "permission": {
-        "task": "deny",
-        "question": "deny",
-        "edit": {
-          "*": "allow"
-        },
-        "bash": {
-          "*": "allow",
-          "git push --force*": "deny",
-          "git push -f*": "deny",
-          "git reset --hard*": "deny",
-          "git clean*": "deny",
-          "git checkout .": "deny",
-          "git checkout -- .": "deny",
-          "git rebase*": "deny",
-          "git filter-branch*": "deny",
-          "git commit --amend*": "deny",
-          "git commit -a --amend*": "deny",
-          "rm -rf*": "deny",
-          "rm -fr*": "deny",
-          "sudo *": "deny",
-          "su *": "deny",
-          "chmod 777*": "deny"
-        },
-        "skill": {
-          "*": "deny",
-          "common": "allow",
-          "ops": "allow",
-          "tests": "allow",
-          "suivi": "allow"
-        }
-      }
     }
   }
 }
